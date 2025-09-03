@@ -52,6 +52,8 @@ class Computation : public WidgetAction
 
 public:
     Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, SettingsAction& SettingsAction);
+    void highlightTriggered();
+    void clickTriggered();
 private:
     void prepareChartData();
     void exportDataAsCSV();

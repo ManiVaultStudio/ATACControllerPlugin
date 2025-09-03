@@ -32,6 +32,7 @@ void ATACControllerViewPlugin::init()
     settings->setContentsMargins(0, 0, 0, 0);
     settings->setSpacing(0);
     settings->addWidget(_settingsAction.getComputationOptionsHolder().createWidget(&getWidget()));
+    settings->addWidget(_settingsAction.getDataOptionsHolder().createCollapsedWidget(&getWidget()));
     settings->addWidget(_settingsAction.getChartOptionsHolder().createCollapsedWidget(&getWidget()));
     layout->addLayout(settings);
 
@@ -39,9 +40,42 @@ void ATACControllerViewPlugin::init()
     layout->addWidget(_stackedBarChartWidget, 1);
     getWidget().setLayout(layout);
 
+    // Connect to bar segment click
+    connect(_stackedBarChartWidget, &StackedBarChartWidget::barSegmentClicked,
+        this, [this](int barIndex, int segmentIndex) {
+            // Handle click event
+            this->_computation.clickTriggered();
+        });
+
+    // Connect to bar segment selection (highlight)
+    connect(_stackedBarChartWidget, &StackedBarChartWidget::barSegmentSelected,
+        this, [this](int barIndex, int segmentIndex) {
+            // Handle selection event
+            this->_computation.highlightTriggered();
+        });
 
 
-
+    //_stackedBarChartWidget->setShowLegend(true);
+    //_stackedBarChartWidget->setLegendPosition(StackedBarChartWidget::LegendRight); // or LegendLeft, LegendTop, LegendBottom
+    //_stackedBarChartWidget->setLegendFont(QFont("Arial", 10));
+    //_stackedBarChartWidget->setLegendStyle(Qt::SolidPattern); // or other Qt::BrushStyle
+    //_stackedBarChartWidget->setUseRoundedBars(true);
+    //_stackedBarChartWidget->setStackingDirection(StackedBarChartWidget::Vertical); // or Horizontal
+    //_stackedBarChartWidget->setBarSpacing(10);
+    //_stackedBarChartWidget->setBarWidth(50);
+    //_stackedBarChartWidget->setBarBorderColor(Qt::black);
+    //_stackedBarChartWidget->setBarBorderThickness(2);
+    //_stackedBarChartWidget->setBarCornerRadius(5);
+    //_stackedBarChartWidget->setBarOpacity(0.8);
+    //_stackedBarChartWidget->setShowValuesOnSegments(true);
+    //_stackedBarChartWidget->setShowAxes(true);
+    //_stackedBarChartWidget->setAxisFont(QFont("Arial", 10));
+    //_stackedBarChartWidget->setShowGrid(true);
+    //_stackedBarChartWidget->setGridColor(Qt::lightGray);
+    //_stackedBarChartWidget->setHighlightColor(Qt::yellow);
+    //_stackedBarChartWidget->setHighlightColors(QVector<QColor>{Qt::blue });
+    //_stackedBarChartWidget->setAnimationDuration(400);
+    //_stackedBarChartWidget->sortBars(StackedBarChartWidget::SortByTotal); // or SortByLabel
 }
 
 ATACControllerViewPluginFactory::ATACControllerViewPluginFactory()
