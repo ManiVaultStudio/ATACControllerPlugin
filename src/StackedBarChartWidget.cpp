@@ -178,8 +178,10 @@ void StackedBarChartWidget::setAnimationDuration(int duration)
 
 void StackedBarChartWidget::sortBars(SortType type)
 {
+
     if (type == SortByTotal) {
-        QVector<std::pair<double, int>> totals;
+        // TODO: remove sorting, sorting already done in Computation
+        /*QVector<std::pair<double, int>> totals;
         for (int i = 0; i < m_data.size(); ++i) {
             double total = std::accumulate(m_data[i].begin(), m_data[i].end(), 0.0);
             totals.append({ total, i });
@@ -193,7 +195,7 @@ void StackedBarChartWidget::sortBars(SortType type)
                 sortedBarLabels.append(m_barLabels[pair.second]);
         }
         m_data = sortedData;
-        m_barLabels = sortedBarLabels;
+        m_barLabels = sortedBarLabels;*/
     }
     else if (type == SortByLabel) {
         QVector<std::pair<QString, int>> labels;

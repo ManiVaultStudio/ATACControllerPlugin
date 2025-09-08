@@ -441,7 +441,7 @@ std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::
     }
 
     std::vector<std::pair<int, int>> sortedClusterCount(clusterCount.begin(), clusterCount.end());
-    std::sort(sortedClusterCount.begin(), sortedClusterCount.end(), [](const auto& a, const auto& b) { return a.second > b.second; });
+    std::sort(sortedClusterCount.begin(), sortedClusterCount.end(), [](const auto& a, const auto& b) { return a.second < b.second; }); // sort in ascending order, because painting starts from the bottom
 
     for (const auto& [clusterIndex, count] : sortedClusterCount)
     {
