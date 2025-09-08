@@ -407,6 +407,8 @@ void Computation::prepareChartData()
     chartWidget->setColors(barColors);
     chartWidget->setBarLabels(barLabels);
     chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" }); ///change
+
+    _chartDataProcessing = false;
 }
 
 std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints)
@@ -445,7 +447,7 @@ std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::
         colors << color;
     }
 
-    _chartDataProcessing = false;
+    
 
     return { labels, data, colors };
 }
