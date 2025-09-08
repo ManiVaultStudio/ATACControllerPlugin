@@ -41,14 +41,20 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
     _viewerPlugin(ATACControllerViewPlugin),
     _settingsAction(SettingsAction)
 {
+    connect(&_points, &Dataset<Points>::changed, this, [this]() {
+        prepareChartData();
+        });
+
+    connect(&_clusters, &Dataset<Clusters>::changed, this, [this]() {
+        prepareChartData();
+        });
+
     connect(&_points, &Dataset<Points>::dataChanged, this, [this]() {
-
-
+        prepareChartData();
         });
 
     connect(&_clusters, &Dataset<Clusters>::dataChanged, this, [this]() {
-
-
+        prepareChartData();
         });
 
     connect(&_settingsAction.getDataOptionsHolder().getPointDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
@@ -66,7 +72,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         });
 
     connect(&_settingsAction.getDataOptionsHolder().getClusterDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
-        if( _settingsAction.getDataOptionsHolder().getClusterDatasetAction().getCurrentDataset().isValid())
+        if (_settingsAction.getDataOptionsHolder().getClusterDatasetAction().getCurrentDataset().isValid())
         {
             _clusters = _settingsAction.getDataOptionsHolder().getClusterDatasetAction().getCurrentDataset();
 
@@ -76,14 +82,14 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
             _clusters = Dataset<Clusters>();
         }
         });
-       
+
 
     connect(&_settingsAction.getComputationOptionsHolder().getExportButtonAction(), &TriggerAction::triggered, this, [this]() {
-        //prepareChartData();//added for testing remove and add in the method that calls it
-        exportDataAsCSV();
+        prepareChartData();//added for testing remove and add in the method that calls it
+        //exportDataAsCSV();
         });
     connect(&_settingsAction.getComputationOptionsHolder().getDimensionPickerAction(), &DimensionPickerAction::currentDimensionIndexChanged, this, [this]() {
-
+        prepareChartData(); // FIXME: is it only intended for Spatial data?
 
         });
 
@@ -127,7 +133,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
-        
+
         int fontSize = _settingsAction.getChartOptionsHolder().getLegendFontsizeAction().getValue();
         chartWidget->setLegendFont(QFont("Arial", fontSize));
 
@@ -136,7 +142,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
-        
+
         QString style = _settingsAction.getChartOptionsHolder().getLegendStyleAction().getCurrentText();
         if (style == "solid")
         {
@@ -197,7 +203,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
-        
+
         int spacing = _settingsAction.getChartOptionsHolder().getBarSpacingAction().getValue();
         chartWidget->setBarSpacing(spacing);
 
@@ -215,7 +221,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
-        
+
         QColor color = _settingsAction.getChartOptionsHolder().getBarBorderColorAction().getColor();
         chartWidget->setBarBorderColor(color);
 
@@ -284,7 +290,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
 
         QColor color = _settingsAction.getChartOptionsHolder().getGridColorAction().getColor();
         chartWidget->setGridColor(color);
-        
+
 
         });
     connect(&_settingsAction.getChartOptionsHolder().getSortingAction(), &OptionAction::currentIndexChanged, this, [this]() {
@@ -326,12 +332,61 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         //chartWidget->setAxisFont(QFont("Arial", 10));
         chartWidget->setHighlightColors(QVector<QColor>{});
     }
-    
+
 }
 
 void Computation::prepareChartData()
 {
-    std::random_device rd;
+    if (!_points.isValid() || !_clusters.isValid())
+    {
+        qDebug() << "Invalid points or clusters dataset.";
+        return;
+    }
+
+    QVector<Cluster> metadata = _clusters->getClusters();
+
+    QStringList barLabels = { "Bar 1" };
+
+    std::vector<float> inputVector;
+    _points->extractDataForDimension(inputVector, 0);// FIXME: only intended for ATAC-seq scalars and RNA mapped data
+    // TODO: populate SPatial data dimension
+
+    int numPoints = inputVector.size();
+
+    int top10 = numPoints / 100; // top 10% of the cells
+
+    // first, sort the indices based on the selected gene expression
+    std::vector<std::pair<float, int>> rankedCells;
+    rankedCells.reserve(numPoints);
+
+    for (int i = 0; i < numPoints; i++)
+    {
+        rankedCells.emplace_back(inputVector[i], i);
+    }
+
+    auto nth = rankedCells.begin() + top10;
+    std::nth_element(rankedCells.begin(), nth, rankedCells.end(), std::greater<std::pair<float, int>>());
+
+    // count the occurrences of each cluster in the top 10%
+    std::vector<int> top10Points;
+    top10Points.reserve(top10);
+    for (int i = 0; i < top10; i++)
+    {
+        int originalIndex = rankedCells[i].second;
+        top10Points.push_back(originalIndex);
+    }
+
+    QVector<QVector<double>> bardata;
+    QStringList segmentLabels;
+    QVector<QColor> barColors;
+
+    std::tie(segmentLabels, bardata, barColors) = computeMetadataCounts(metadata, top10Points);
+
+    qDebug() << "Segment Labels:" << segmentLabels.size();
+
+
+    //dummy data for test
+   /* std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(5.0, 35.0);
 
@@ -349,17 +404,57 @@ void Computation::prepareChartData()
 
     QStringList segmentLabels = { "Segment A", "Segment B", "Segment C" };
     QStringList barLabels = { "Bar 1" };
-    QVector<QColor> colors = { QColor("#4e79a7"), QColor("#f28e2b"), QColor("#e15759") };
+    QVector<QColor> colors = { QColor("#4e79a7"), QColor("#f28e2b"), QColor("#e15759") };*/
+
+    //change till here
 
     auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
     if (!chartWidget)
         return;
 
     chartWidget->clearData();
-    chartWidget->setData(data, segmentLabels);
-    chartWidget->setColors(colors);
+    chartWidget->setData(bardata, segmentLabels); // TODO: if double necessary?
+    chartWidget->setColors(barColors);
     chartWidget->setBarLabels(barLabels);
-    chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" });
+    chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" }); ///change
+}
+
+std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints)
+{
+    QStringList labels;
+    QVector<QVector<double>> data(1);  // one bar, multiple segments
+    QVector<QColor> colors;
+
+    std::unordered_map<int, int> cellToClusterMap; // maps global cell index to cluster index
+    for (int clusterIndex = 0; clusterIndex < metadata.size(); ++clusterIndex) {
+        const auto& ptIndices = metadata[clusterIndex].getIndices();
+        for (int cellIndex : ptIndices) {
+            cellToClusterMap[cellIndex] = clusterIndex;
+        }
+    }
+
+    std::unordered_map<int, int> clusterCount; // maps cluster index to count
+    for (int i = 0; i < topPoints.size(); ++i) {
+        int index = topPoints[i];
+        if (cellToClusterMap.find(index) != cellToClusterMap.end()) {
+            int clusterIndex = cellToClusterMap[index];
+            clusterCount[clusterIndex]++;
+        }
+    }
+
+    std::vector<std::pair<int, int>> sortedClusterCount(clusterCount.begin(), clusterCount.end());
+    std::sort(sortedClusterCount.begin(), sortedClusterCount.end(), [](const auto& a, const auto& b) { return a.second > b.second; });
+
+    for (const auto& [clusterIndex, count] : sortedClusterCount)
+    {
+        QString clusterName = metadata[clusterIndex].getName();
+        labels << clusterName;
+        data[0].append(count);
+        QColor color = metadata[clusterIndex].getColor();
+        colors << color;
+    }
+
+    return { labels, data, colors };
 }
 
 void Computation::highlightTriggered()
@@ -386,7 +481,7 @@ void Computation::exportDataAsCSV()
             {
                 QTextStream out(&file);
                 QString csvString = exportString;
-                csvString.replace("\\n", "\n"); 
+                csvString.replace("\\n", "\n");
                 out << csvString;
                 file.close();
                 qDebug() << "Data exported to" << fileName;
