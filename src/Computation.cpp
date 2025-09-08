@@ -42,22 +42,27 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
     _settingsAction(SettingsAction)
 {
     connect(&_points, &Dataset<Points>::changed, this, [this]() {
+        qDebug() << "_points changed";
         prepareChartData();
         });
 
     connect(&_clusters, &Dataset<Clusters>::changed, this, [this]() {
+        qDebug() << "_clusters changed";
         prepareChartData();
         });
 
     connect(&_points, &Dataset<Points>::dataChanged, this, [this]() {
+        qDebug() << "_points dataChanged";
         prepareChartData();
         });
 
     connect(&_clusters, &Dataset<Clusters>::dataChanged, this, [this]() {
+        qDebug() << "_clusters dataChanged";
         prepareChartData();
         });
 
     connect(&_settingsAction.getDataOptionsHolder().getPointDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
+        qDebug() << "Point dataset dimension changed";
 
         if (_settingsAction.getDataOptionsHolder().getPointDatasetAction().getCurrentDataset().isValid())
         {
@@ -72,10 +77,11 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         });
 
     connect(&_settingsAction.getDataOptionsHolder().getClusterDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
+        qDebug() << "Cluster dataset dimension changed";
+
         if (_settingsAction.getDataOptionsHolder().getClusterDatasetAction().getCurrentDataset().isValid())
         {
             _clusters = _settingsAction.getDataOptionsHolder().getClusterDatasetAction().getCurrentDataset();
-
         }
         else
         {
@@ -83,18 +89,15 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         }
         });
 
-
     connect(&_settingsAction.getComputationOptionsHolder().getExportButtonAction(), &TriggerAction::triggered, this, [this]() {
-        prepareChartData();//added for testing remove and add in the method that calls it
+        //prepareChartData();//added for testing remove and add in the method that calls it
         //exportDataAsCSV();
         });
+
     connect(&_settingsAction.getComputationOptionsHolder().getDimensionPickerAction(), &DimensionPickerAction::currentDimensionIndexChanged, this, [this]() {
+        qDebug() << "dimensionPicker changed";
         prepareChartData(); // FIXME: is it only intended for Spatial data?
-
         });
-
-
-
 
     //chartcustomization
     connect(&_settingsAction.getChartOptionsHolder().getShowLegendAction(), &ToggleAction::toggled, this, [this]() {
@@ -172,7 +175,6 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         {
             chartWidget->setLegendStyle(Qt::NoBrush);
         }
-
 
         });
     connect(&_settingsAction.getChartOptionsHolder().getRoundedBarsAction(), &ToggleAction::toggled, this, [this]() {
@@ -258,7 +260,6 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         if (!chartWidget)
             return;
 
-
         chartWidget->setShowValuesOnSegments(_settingsAction.getChartOptionsHolder().getShowValuesOnSegmentsAction().isChecked());
 
         });
@@ -332,7 +333,6 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         //chartWidget->setAxisFont(QFont("Arial", 10));
         chartWidget->setHighlightColors(QVector<QColor>{});
     }
-
 }
 
 void Computation::prepareChartData()
@@ -353,7 +353,7 @@ void Computation::prepareChartData()
 
     int numPoints = inputVector.size();
 
-    int top10 = numPoints / 100; // top 10% of the cells
+    int top10 = numPoints / 100; // FIXME: hard coded top 1% of the cells
 
     // first, sort the indices based on the selected gene expression
     std::vector<std::pair<float, int>> rankedCells;
@@ -405,8 +405,6 @@ void Computation::prepareChartData()
     QStringList segmentLabels = { "Segment A", "Segment B", "Segment C" };
     QStringList barLabels = { "Bar 1" };
     QVector<QColor> colors = { QColor("#4e79a7"), QColor("#f28e2b"), QColor("#e15759") };*/
-
-    //change till here
 
     auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
     if (!chartWidget)
