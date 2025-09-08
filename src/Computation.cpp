@@ -353,7 +353,7 @@ void Computation::prepareChartData()
 
     int numPoints = inputVector.size();
 
-    int top10 = numPoints / 100; // FIXME: hard coded top 1% of the cells
+    int topCells = numPoints / 100; // FIXME: hard coded top 1% of the cells
 
     // first, sort the indices based on the selected gene expression
     std::vector<std::pair<float, int>> rankedCells;
@@ -364,47 +364,25 @@ void Computation::prepareChartData()
         rankedCells.emplace_back(inputVector[i], i);
     }
 
-    auto nth = rankedCells.begin() + top10;
+    auto nth = rankedCells.begin() + topCells;
     std::nth_element(rankedCells.begin(), nth, rankedCells.end(), std::greater<std::pair<float, int>>());
 
     // count the occurrences of each cluster in the top 10%
-    std::vector<int> top10Points;
-    top10Points.reserve(top10);
-    for (int i = 0; i < top10; i++)
+    std::vector<int> topCellsPoints;
+    topCellsPoints.reserve(topCells);
+    for (int i = 0; i < topCells; i++)
     {
         int originalIndex = rankedCells[i].second;
-        top10Points.push_back(originalIndex);
+        topCellsPoints.push_back(originalIndex);
     }
 
     QVector<QVector<double>> bardata;
     QStringList segmentLabels;
     QVector<QColor> barColors;
 
-    std::tie(segmentLabels, bardata, barColors) = computeMetadataCounts(metadata, top10Points);
+    std::tie(segmentLabels, bardata, barColors) = computeMetadataCounts(metadata, topCellsPoints);
 
     qDebug() << "Segment Labels:" << segmentLabels.size();
-
-
-    //dummy data for test
-   /* std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(5.0, 35.0);
-
-    QVector<QVector<double>> data;
-    int numBars = 1;
-    int numSegments = 3;
-
-    for (int bar = 0; bar < numBars; ++bar) {
-        QVector<double> segments;
-        for (int seg = 0; seg < numSegments; ++seg) {
-            segments.append(dis(gen));
-        }
-        data.append(segments);
-    }
-
-    QStringList segmentLabels = { "Segment A", "Segment B", "Segment C" };
-    QStringList barLabels = { "Bar 1" };
-    QVector<QColor> colors = { QColor("#4e79a7"), QColor("#f28e2b"), QColor("#e15759") };*/
 
     auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
     if (!chartWidget)
@@ -419,6 +397,7 @@ void Computation::prepareChartData()
 
 std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints)
 {
+    // adapted from DualViewPlugin
     QStringList labels;
     QVector<QVector<double>> data(1);  // one bar, multiple segments
     QVector<QColor> colors;
