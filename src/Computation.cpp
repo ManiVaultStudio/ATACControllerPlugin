@@ -61,8 +61,13 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         prepareChartData();
         });
 
+    connect(&_points, &Dataset<Points>::dataDimensionsChanged, this, [this]() {
+        qDebug() << "_points dataDimensionsChanged";
+        prepareChartData();
+        });
+
     connect(&_settingsAction.getDataOptionsHolder().getPointDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
-        qDebug() << "Point dataset dimension changed";
+        qDebug() << "getPointDatasetAction() changed";
 
         if (_settingsAction.getDataOptionsHolder().getPointDatasetAction().getCurrentDataset().isValid())
         {
@@ -77,7 +82,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         });
 
     connect(&_settingsAction.getDataOptionsHolder().getClusterDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
-        qDebug() << "Cluster dataset dimension changed";
+        qDebug() << "getClusterDatasetAction() changed";
 
         if (_settingsAction.getDataOptionsHolder().getClusterDatasetAction().getCurrentDataset().isValid())
         {
@@ -337,11 +342,20 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
 
 void Computation::prepareChartData()
 {
+    if (_chartDataProcessing)
+    {
+        qDebug() << "_chartDataProcessing is true, so return";
+        return;
+    }
+        
+
     if (!_points.isValid() || !_clusters.isValid())
     {
         qDebug() << "Invalid points or clusters dataset.";
         return;
     }
+
+    _chartDataProcessing = true;
 
     QVector<Cluster> metadata = _clusters->getClusters();
 
@@ -430,6 +444,8 @@ std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::
         QColor color = metadata[clusterIndex].getColor();
         colors << color;
     }
+
+    _chartDataProcessing = false;
 
     return { labels, data, colors };
 }
