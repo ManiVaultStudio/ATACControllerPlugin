@@ -32,6 +32,8 @@
 #include <QFutureWatcher>
 #include <QVector>
 #include <random> 
+
+#include <chrono>
 using namespace mv;
 using namespace mv::gui;
 
@@ -342,7 +344,6 @@ void Computation::prepareChartData()
         qDebug() << "_chartDataProcessing is true, so return";
         return;
     }
-        
 
     if (!_points.isValid() || !_clusters.isValid())
     {
@@ -356,53 +357,92 @@ void Computation::prepareChartData()
 
     std::vector<float> inputVector;
     _points->extractDataForDimension(inputVector, 0);// FIXME: only intended for ATAC-seq scalars and RNA mapped data
+
     // TODO: populate SPatial data dimension
 
-    int numPoints = inputVector.size();
+    const int numPoints = static_cast<int>(inputVector.size());
 
-    int topCells = numPoints / 100; // FIXME: hard coded top 1% of the cells
+    int topCells = std::max(1, numPoints / 100); // FIXME: hard coded top 1% of the cells
 
-    // first, sort the indices based on the selected gene expression
-    std::vector<std::pair<float, int>> rankedCells;
-    rankedCells.reserve(numPoints);
+    std::vector<int> indices(numPoints);
+    std::iota(indices.begin(), indices.end(), 0); // [0..numPoints)
 
-    for (int i = 0; i < numPoints; i++)
-    {
-        rankedCells.emplace_back(inputVector[i], i);
-    }
+    // Partition so first 'topCells' indices are the top by value
+    auto nth = indices.begin() + topCells;
+    std::nth_element(indices.begin(), nth, indices.end(),
+        [&](int a, int b) { return inputVector[a] > inputVector[b]; });
 
-    auto nth = rankedCells.begin() + topCells;
-    std::nth_element(rankedCells.begin(), nth, rankedCells.end(), std::greater<std::pair<float, int>>());
+    indices.resize(topCells); // keep only the top ones
 
-    // count the occurrences of each cluster in the top 10%
-    std::vector<int> topCellsPoints;
-    topCellsPoints.reserve(topCells);
-    for (int i = 0; i < topCells; i++)
-    {
-        int originalIndex = rankedCells[i].second;
-        topCellsPoints.push_back(originalIndex);
-    }
-
-    QVector<QVector<double>> bardata;
-    QStringList segmentLabels;
+    QStringList   segmentLabels;
+    QVector<QVector<double>> barData;
     QVector<QColor> barColors;
 
-    std::tie(segmentLabels, bardata, barColors) = computeMetadataCounts(metadata, topCellsPoints);
+    std::tie(segmentLabels, barData, barColors) = computeMetadataCounts(metadata, indices, numPoints);
 
     auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
     if (!chartWidget)
         return;
 
     chartWidget->clearData();
-    chartWidget->setData(bardata, segmentLabels); // TODO: if double necessary?
+    chartWidget->setData(barData, segmentLabels); // TODO: if double necessary?
     chartWidget->setColors(barColors);
     //chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" }); // TODO: to remove, not needed
 
     _chartDataProcessing = false;
 }
 
+std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints, int numPoints)
+{
+    const int nClusters = metadata.size();
+
+    std::vector<int> cellToCluster(numPoints, -1); // -1 means "no cluster"
+    for (int c = 0; c < nClusters; ++c) {
+        const auto& idx = metadata[c].getIndices();
+        for (int cell : idx) {
+            if (cell >= 0 && cell < numPoints) cellToCluster[cell] = c;
+        }
+    }
+
+    // Count occurrences per cluster among top points
+    QVector<int> counts(nClusters, 0);
+    for (int cell : topPoints) {
+        if (cell >= 0 && cell < numPoints) {
+            int cluster = cellToCluster[cell];
+            if (cluster >= 0) ++counts[cluster];
+        }
+    }
+
+    // Collect only non-zero clusters and sort ascending by count
+    std::vector<std::pair<int, int>> nonZeroClusters;  // (clusterIndex, count)
+    nonZeroClusters.reserve(nClusters);
+    for (int cluster = 0; cluster < nClusters; ++cluster) {
+        if (counts[cluster] > 0) nonZeroClusters.emplace_back(cluster, counts[cluster]);
+    }
+    std::sort(nonZeroClusters.begin(), nonZeroClusters.end(),
+        [](const auto& a, const auto& b) { return a.second < b.second; });
+
+    QStringList labels;
+    labels.reserve(static_cast<int>(nonZeroClusters.size()));
+
+    QVector<QVector<double>> data(1);
+    data[0].reserve(static_cast<int>(nonZeroClusters.size()));
+
+    QVector<QColor> colors;
+    colors.reserve(static_cast<int>(nonZeroClusters.size()));
+
+    for (const auto& [clusterIndex, count] : nonZeroClusters) {
+        labels << metadata[clusterIndex].getName();
+        data[0].append(static_cast<double>(count));
+        colors << metadata[clusterIndex].getColor();
+    }
+
+    return { labels, data, colors };
+}
+
 std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints)
 {
+    // TODO: to remove, not used
     // adapted from DualViewPlugin
     QStringList labels;
     QVector<QVector<double>> data(1);  // one bar, multiple segments
