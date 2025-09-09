@@ -42,12 +42,27 @@ public:
     void init() override;
     StackedBarChartWidget* getStackedBarChartWidget() const { return _stackedBarChartWidget; }
 
+public: // Serialization
+    /**
+    * Load plugin from variant map
+    * @param Variant map representation of the plugin
+    */
+    Q_INVOKABLE void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+    * Save plugin to variant map
+    * @return Variant map representation of the plugin
+    */
+    Q_INVOKABLE QVariantMap toVariantMap() const override;
+
+
 
 protected:
     SettingsAction          _settingsAction;
     Computation             _computation;
     StackedBarChartWidget*  _stackedBarChartWidget;
 };
+
 
 /**
  * ATACController view plugin factory class

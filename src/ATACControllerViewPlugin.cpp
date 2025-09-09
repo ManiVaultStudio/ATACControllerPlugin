@@ -78,6 +78,29 @@ void ATACControllerViewPlugin::init()
     //_stackedBarChartWidget->sortBars(StackedBarChartWidget::SortByTotal); // or SortByLabel
 }
 
+// =============================================================================
+// Serialization
+// =============================================================================
+
+void ATACControllerViewPlugin::fromVariantMap(const QVariantMap& variantMap)
+{
+    ViewPlugin::fromVariantMap(variantMap);
+    mv::util::variantMapMustContain(variantMap, "ATACControllerViewPlugin:Settings");
+    _settingsAction.fromVariantMap(variantMap["ATACControllerViewPlugin:Settings"].toMap());
+}
+
+QVariantMap ATACControllerViewPlugin::toVariantMap() const
+{
+    QVariantMap variantMap = ViewPlugin::toVariantMap();
+    _settingsAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
+
+// =============================================================================
+// Plugin Factory 
+// =============================================================================
+
 ATACControllerViewPluginFactory::ATACControllerViewPluginFactory()
 {
     getPluginMetadata().setDescription("ATACController view plugin");
