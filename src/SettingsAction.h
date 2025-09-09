@@ -140,14 +140,14 @@ public:
         const DatasetPickerAction& getPointDatasetAction() const { return _pointDatasetAction; }
         DatasetPickerAction& getPointDatasetAction() { return _pointDatasetAction; }
 
-        const VariantAction& getExportDataAction() const { return _exportDataAction; }
-        VariantAction& getExportDataAction() { return _exportDataAction; }
+        //const VariantAction& getExportDataAction() const { return _exportDataAction; }
+        //VariantAction& getExportDataAction() { return _exportDataAction; }
 
     protected:
         SettingsAction& _settingsOptions;
         DatasetPickerAction     _clusterDatasetAction;
         DatasetPickerAction     _pointDatasetAction;
-        VariantAction           _exportDataAction;
+        //VariantAction           _exportDataAction;
     };
 
     class ComputationOptionsHolder : public HorizontalGroupAction
@@ -158,14 +158,14 @@ public:
         const DimensionPickerAction& getDimensionPickerAction() const { return _dimensionPickerAction; }
         DimensionPickerAction& getDimensionPickerAction() { return _dimensionPickerAction; }
 
-        const TriggerAction& getExportButtonAction() const { return _exportButtonAction; }
-        TriggerAction& getExportButtonAction() { return _exportButtonAction; }
+        //const TriggerAction& getExportButtonAction() const { return _exportButtonAction; }
+        //TriggerAction& getExportButtonAction() { return _exportButtonAction; }
 
 
     protected:
         SettingsAction& _settingsOptions;
         DimensionPickerAction   _dimensionPickerAction;
-        TriggerAction           _exportButtonAction;
+        //TriggerAction           _exportButtonAction;
 
     };
 

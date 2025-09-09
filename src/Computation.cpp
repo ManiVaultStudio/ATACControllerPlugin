@@ -94,10 +94,10 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         }
         });
 
-    connect(&_settingsAction.getComputationOptionsHolder().getExportButtonAction(), &TriggerAction::triggered, this, [this]() {
-        //prepareChartData();//added for testing remove and add in the method that calls it
-        //exportDataAsCSV();
-        });
+    //connect(&_settingsAction.getComputationOptionsHolder().getExportButtonAction(), &TriggerAction::triggered, this, [this]() {
+    //    //prepareChartData();//added for testing remove and add in the method that calls it
+    //    exportDataAsCSV();
+    //    });
 
     connect(&_settingsAction.getComputationOptionsHolder().getDimensionPickerAction(), &DimensionPickerAction::currentDimensionIndexChanged, this, [this]() {
         qDebug() << "dimensionPicker changed";
@@ -462,33 +462,33 @@ void Computation::clickTriggered()
     //TODO
 }
 
-void Computation::exportDataAsCSV()
-{
-    QString exportString = _settingsAction.getDataOptionsHolder().getExportDataAction().getVariant().toString();
-    if (!exportString.isEmpty())
-    {
-        // store data in the exportString as a,b,c\nd,e,f\n g,h,i\n ...
-        QString fileName = QFileDialog::getSaveFileName(nullptr, "Save CSV", "", "CSV files (*.csv);;All files (*.*)");
-        if (!fileName.isEmpty())
-        {
-            QFile file(fileName);
-            if (file.open(QIODevice::WriteOnly | QIODevice::Text))
-            {
-                QTextStream out(&file);
-                QString csvString = exportString;
-                csvString.replace("\\n", "\n");
-                out << csvString;
-                file.close();
-                qDebug() << "Data exported to" << fileName;
-            }
-            else
-            {
-                qDebug() << "Could not open file for writing";
-            }
-        }
-    }
-    else
-    {
-        qDebug() << "No data to export";
-    }
-}
+//void Computation::exportDataAsCSV()
+//{
+//    QString exportString = _settingsAction.getDataOptionsHolder().getExportDataAction().getVariant().toString();
+//    if (!exportString.isEmpty())
+//    {
+//        // store data in the exportString as a,b,c\nd,e,f\n g,h,i\n ...
+//        QString fileName = QFileDialog::getSaveFileName(nullptr, "Save CSV", "", "CSV files (*.csv);;All files (*.*)");
+//        if (!fileName.isEmpty())
+//        {
+//            QFile file(fileName);
+//            if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+//            {
+//                QTextStream out(&file);
+//                QString csvString = exportString;
+//                csvString.replace("\\n", "\n");
+//                out << csvString;
+//                file.close();
+//                qDebug() << "Data exported to" << fileName;
+//            }
+//            else
+//            {
+//                qDebug() << "Could not open file for writing";
+//            }
+//        }
+//    }
+//    else
+//    {
+//        qDebug() << "No data to export";
+//    }
+//}

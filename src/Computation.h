@@ -58,7 +58,7 @@ private:
     //void computeTopMetadata(const QVector<Cluster>& metadata, const std::vector<float>& inputVector, QStringList& labels, QStringList& bardata, QStringList& colors);
     std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints);
     void prepareChartData();
-    void exportDataAsCSV();
+    //void exportDataAsCSV();
 protected:
     ATACControllerViewPlugin& _viewerPlugin;
     SettingsAction& _settingsAction;
