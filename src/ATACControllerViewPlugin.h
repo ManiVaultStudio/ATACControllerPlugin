@@ -45,8 +45,8 @@ public:
 
 protected:
     SettingsAction          _settingsAction;
-    Computation          _computation;
-    StackedBarChartWidget* _stackedBarChartWidget;
+    Computation             _computation;
+    StackedBarChartWidget*  _stackedBarChartWidget;
 };
 
 /**

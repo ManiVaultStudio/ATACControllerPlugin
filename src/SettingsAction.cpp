@@ -29,12 +29,10 @@ SettingsAction::SettingsAction(ATACControllerViewPlugin& ATACControllerViewPlugi
     _dataOptionsHolder.getPointDatasetAction().setSerializationName("ATACController:PointDataset");
     _dataOptionsHolder.getClusterDatasetAction().setSerializationName("ATACController:ClusterDataset");
     _computationOptionsHolder.getDimensionPickerAction().setSerializationName("ATACController:DimensionPicker");
-    //_dataOptionsHolder.getExportDataAction().setSerializationName("ATACController:ExportData");
 
     _dataOptionsHolder.getPointDatasetAction().setToolTip("Point Dataset");
     _dataOptionsHolder.getClusterDatasetAction().setToolTip("Cluster Dataset");
     _computationOptionsHolder.getDimensionPickerAction().setToolTip("Dimension Picker");
-    //_dataOptionsHolder.getExportDataAction().setToolTip("ExportData");
 
     _dataOptionsHolder.getPointDatasetAction().setFilterFunction([this](mv::Dataset<DatasetImpl> dataset) -> bool {
         return dataset->getDataType() == PointType;
@@ -46,9 +44,6 @@ SettingsAction::SettingsAction(ATACControllerViewPlugin& ATACControllerViewPlugi
     _dataOptionsHolder.getPointDatasetAction().setDefaultWidgetFlags(OptionAction::ComboBox);
     _dataOptionsHolder.getClusterDatasetAction().setDefaultWidgetFlags(OptionAction::ComboBox);
     _computationOptionsHolder.getDimensionPickerAction().setDefaultWidgetFlags(OptionAction::ComboBox);
-    //_computationOptionsHolder.getExportButtonAction().setDefaultWidgetFlags(TriggerAction::IconText);
-    //_dataOptionsHolder.getExportDataAction().setDefaultWidgetFlags(StringAction::Label);
-
 
     //chart customization options
     _chartOptionsHolder.getShowLegendAction().setSerializationName("ATACController:ChartCustomization:Show Legend");
@@ -176,14 +171,12 @@ inline SettingsAction::ComputationOptionsHolder::ComputationOptionsHolder(Settin
     HorizontalGroupAction(&settingsAction, "Computation Options"),
     _settingsOptions(settingsAction),
     _dimensionPickerAction(this, "Dimension")
-    //_exportButtonAction(this, "Data export")
 {
     setText("Dataset1 Options");
     setIcon(mv::util::StyledIcon("database"));
     setPopupSizeHint(QSize(300, 0));
     setConfigurationFlag(WidgetAction::ConfigurationFlag::Default);
     addAction(&_dimensionPickerAction);
-    //addAction(&_exportButtonAction);
 }
 
 inline SettingsAction::DataOptionsHolder::DataOptionsHolder(SettingsAction& settingsAction) :
@@ -191,7 +184,6 @@ inline SettingsAction::DataOptionsHolder::DataOptionsHolder(SettingsAction& sett
     _settingsOptions(settingsAction),
     _pointDatasetAction(this, "Point dataset"),
     _clusterDatasetAction(this, "Cluster dataset")
-    //_exportDataAction(this, "Export data")
 {
     setText("Dataset1 Options");
     setIcon(mv::util::StyledIcon("database"));
@@ -199,7 +191,6 @@ inline SettingsAction::DataOptionsHolder::DataOptionsHolder(SettingsAction& sett
     setConfigurationFlag(WidgetAction::ConfigurationFlag::Default);
     addAction(&_pointDatasetAction);
     addAction(&_clusterDatasetAction);
-    //addAction(&_exportDataAction);
 }
 
 inline SettingsAction::ChartOptionsHolder::ChartOptionsHolder(SettingsAction& settingsAction) :
@@ -261,7 +252,6 @@ void SettingsAction::fromVariantMap(const QVariantMap& variantMap)
     _dataOptionsHolder.getPointDatasetAction().fromParentVariantMap(variantMap);
     _dataOptionsHolder.getClusterDatasetAction().fromParentVariantMap(variantMap);
     _computationOptionsHolder.getDimensionPickerAction().fromParentVariantMap(variantMap);
-    //_dataOptionsHolder.getExportDataAction().fromParentVariantMap(variantMap);
 
     _chartOptionsHolder.getShowLegendAction().fromParentVariantMap(variantMap);
     _chartOptionsHolder.getLegendPositionAction().fromParentVariantMap(variantMap);
@@ -284,8 +274,6 @@ void SettingsAction::fromVariantMap(const QVariantMap& variantMap)
     _chartOptionsHolder.getAnimationDurationAction().fromParentVariantMap(variantMap);
     _chartOptionsHolder.getHighlightColorAction().fromParentVariantMap(variantMap);
 
-
-
 }
 
 QVariantMap SettingsAction::toVariantMap() const
@@ -294,7 +282,6 @@ QVariantMap SettingsAction::toVariantMap() const
     _dataOptionsHolder.getPointDatasetAction().insertIntoVariantMap(variantMap);
     _dataOptionsHolder.getClusterDatasetAction().insertIntoVariantMap(variantMap);
     _computationOptionsHolder.getDimensionPickerAction().insertIntoVariantMap(variantMap);
-    //_dataOptionsHolder.getExportDataAction().insertIntoVariantMap(variantMap);
 
     _chartOptionsHolder.getShowLegendAction().insertIntoVariantMap(variantMap);
     _chartOptionsHolder.getLegendPositionAction().insertIntoVariantMap(variantMap);

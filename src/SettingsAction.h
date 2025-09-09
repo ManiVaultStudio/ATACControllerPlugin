@@ -105,29 +105,27 @@ public:
     protected:
         SettingsAction& _settingsOptions;
 
-
         TriggerAction    _clearChartDataAction;
-        ToggleAction    _showLegendAction;
-        OptionAction   _legendPositionAction; 
+        ToggleAction     _showLegendAction;
+        OptionAction     _legendPositionAction;
         IntegralAction   _legendFontsizeAction;
-        OptionAction    _legendStyleAction; 
-        ToggleAction    _roundedBarsAction;
-        OptionAction   _stackdirectionAction; 
-        IntegralAction  _barSpacingAction;
-        IntegralAction  _barWidthAction;
-        ColorAction _barBorderColorAction;
-        IntegralAction  _barBorderThicknessAction;
-        IntegralAction  _barCornerRadiusAction;
-        DecimalAction  _barOpacityAction;
-        ToggleAction    _showValuesOnSegmentsAction;
-        ToggleAction    _showAxesAction;
+        OptionAction     _legendStyleAction;
+        ToggleAction     _roundedBarsAction;
+        OptionAction     _stackdirectionAction;
+        IntegralAction   _barSpacingAction;
+        IntegralAction   _barWidthAction;
+        ColorAction      _barBorderColorAction;
+        IntegralAction   _barBorderThicknessAction;
+        IntegralAction   _barCornerRadiusAction;
+        DecimalAction    _barOpacityAction;
+        ToggleAction     _showValuesOnSegmentsAction;
+        ToggleAction     _showAxesAction;
         IntegralAction   _axesFontsizeAction;
-        ToggleAction   _showGridAction;
-        ColorAction _gridColorAction;
-        ColorAction _highlightColorAction;
-        OptionAction _sortingAction;
+        ToggleAction     _showGridAction;
+        ColorAction      _gridColorAction;
+        ColorAction      _highlightColorAction;
+        OptionAction     _sortingAction;
         IntegralAction   _animationDurationAction;
-
     };
 
     class DataOptionsHolder : public VerticalGroupAction
@@ -140,14 +138,10 @@ public:
         const DatasetPickerAction& getPointDatasetAction() const { return _pointDatasetAction; }
         DatasetPickerAction& getPointDatasetAction() { return _pointDatasetAction; }
 
-        //const VariantAction& getExportDataAction() const { return _exportDataAction; }
-        //VariantAction& getExportDataAction() { return _exportDataAction; }
-
     protected:
         SettingsAction& _settingsOptions;
         DatasetPickerAction     _clusterDatasetAction;
         DatasetPickerAction     _pointDatasetAction;
-        //VariantAction           _exportDataAction;
     };
 
     class ComputationOptionsHolder : public HorizontalGroupAction
@@ -158,15 +152,9 @@ public:
         const DimensionPickerAction& getDimensionPickerAction() const { return _dimensionPickerAction; }
         DimensionPickerAction& getDimensionPickerAction() { return _dimensionPickerAction; }
 
-        //const TriggerAction& getExportButtonAction() const { return _exportButtonAction; }
-        //TriggerAction& getExportButtonAction() { return _exportButtonAction; }
-
-
     protected:
         SettingsAction& _settingsOptions;
         DimensionPickerAction   _dimensionPickerAction;
-        //TriggerAction           _exportButtonAction;
-
     };
 
 public:
@@ -180,15 +168,12 @@ public:
     void fromVariantMap(const QVariantMap& variantMap) override;
     QVariantMap toVariantMap() const override;
 
-
-
 protected:
     ATACControllerViewPlugin& _viewerPlugin;
     mv::CoreInterface* _core;
     ChartOptionsHolder _chartOptionsHolder;
     ComputationOptionsHolder _computationOptionsHolder;
     DataOptionsHolder _dataOptionsHolder;
-
 
     friend class ChannelAction;
 };
