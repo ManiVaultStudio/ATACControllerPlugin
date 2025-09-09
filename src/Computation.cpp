@@ -354,8 +354,6 @@ void Computation::prepareChartData()
 
     QVector<Cluster> metadata = _clusters->getClusters();
 
-    QStringList barLabels = { "Bar 1" };
-
     std::vector<float> inputVector;
     _points->extractDataForDimension(inputVector, 0);// FIXME: only intended for ATAC-seq scalars and RNA mapped data
     // TODO: populate SPatial data dimension
@@ -391,8 +389,6 @@ void Computation::prepareChartData()
 
     std::tie(segmentLabels, bardata, barColors) = computeMetadataCounts(metadata, topCellsPoints);
 
-    qDebug() << "Segment Labels:" << segmentLabels.size();
-
     auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
     if (!chartWidget)
         return;
@@ -400,8 +396,7 @@ void Computation::prepareChartData()
     chartWidget->clearData();
     chartWidget->setData(bardata, segmentLabels); // TODO: if double necessary?
     chartWidget->setColors(barColors);
-    chartWidget->setBarLabels(barLabels);
-    chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" });
+    //chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" }); // TODO: to remove, not needed
 
     _chartDataProcessing = false;
 }

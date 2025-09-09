@@ -532,10 +532,8 @@ void StackedBarChartWidget::mouseMoveEvent(QMouseEvent* event)
                 m_hoveredBar = i;
                 m_hoveredSegment = j;
                 m_hoveredLegendSegment = j;
-                QString tooltip = QString("%1: %2\nBar: %3\nValue: %4")
+                QString tooltip = QString("%1\nValue: %2")
                     .arg(m_segmentLabels.value(j, QString("Segment %1").arg(j + 1)))
-                    .arg(m_barLabels.value(i, QString("Bar %1").arg(i + 1)))
-                    .arg(m_barLabels.value(i, QString("Bar %1").arg(i + 1)))
                     .arg(m_data[i][j]);
                 QToolTip::showText(event->globalPos(), tooltip, this);
                 update();
