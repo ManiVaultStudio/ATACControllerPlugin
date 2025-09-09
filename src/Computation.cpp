@@ -328,11 +328,11 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         });
 
     auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-    if (chartWidget)
-    {
-        //chartWidget->setAxisFont(QFont("Arial", 10));
-        chartWidget->setHighlightColors(QVector<QColor>{});
-    }
+    //if (chartWidget)
+    //{
+    //    //chartWidget->setAxisFont(QFont("Arial", 10));
+    //    chartWidget->setHighlightColors(QVector<QColor>{}); // TODO: check if this is needed
+    //}
 }
 
 void Computation::prepareChartData()
@@ -401,7 +401,7 @@ void Computation::prepareChartData()
     chartWidget->setData(bardata, segmentLabels); // TODO: if double necessary?
     chartWidget->setColors(barColors);
     chartWidget->setBarLabels(barLabels);
-    chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" }); ///change
+    chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" });
 
     _chartDataProcessing = false;
 }

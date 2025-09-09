@@ -149,6 +149,9 @@ void StackedBarChartWidget::setHighlightColor(const QColor& color)
 
 void StackedBarChartWidget::setHighlightColors(const QVector<QColor>& colors)
 {
+    if (m_segmentLabels.isEmpty())
+        return;
+
     int segmentCount = m_segmentLabels.size();
     if (segmentCount == 0) {
         m_highlightColors = colors;
