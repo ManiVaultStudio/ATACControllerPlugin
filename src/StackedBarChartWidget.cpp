@@ -311,7 +311,9 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
                     painter.setFont(m_axisFont);
                     painter.setPen(Qt::black);
                     painter.drawText(chartRect.left() - 40, y - 8, 35, 16, Qt::AlignRight | Qt::AlignVCenter,
-                        QString::number(maxTotal * i / steps, 'g', 3));
+                        //QString::number(maxTotal * i / steps, 'g', 3)); // would cause 55800 round to 8e+4
+                        QString::number(maxTotal * i / steps, 'f', 0)); // used for cell count
+
                 }
             }
             // Draw X axis ticks/labels for each bar
