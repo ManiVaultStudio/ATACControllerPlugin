@@ -63,6 +63,21 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         prepareChartData();
         });
 
+    connect(&_points, &Dataset<Points>::dataDimensionsChanged, this, [this]() {
+        qDebug() << "_points dataDimensionsChanged";
+        if (_settingsAction.getDataOptionsHolder().getPointDatasetAction().getCurrentDataset().isValid())
+        {
+            _dimensionBlockerFlag = true;
+            _settingsAction.getComputationOptionsHolder().getDimensionPickerAction().setPointsDataset(_settingsAction.getDataOptionsHolder().getPointDatasetAction().getCurrentDataset());
+        }
+        else
+        {
+            _settingsAction.getComputationOptionsHolder().getDimensionPickerAction().setPointsDataset(Dataset<Points>());
+        }
+        _dimensionBlockerFlag = false;
+        });
+
+
     connect(&_settingsAction.getDataOptionsHolder().getPointDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
         qDebug() << "getPointDatasetAction() currentIndexChanged";
 
@@ -93,7 +108,8 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
 
     connect(&_settingsAction.getComputationOptionsHolder().getDimensionPickerAction(), &DimensionPickerAction::currentDimensionIndexChanged, this, [this]() {
         qDebug() << "getDimensionPickerAction() currentDimensionIndexChanged";
-        prepareChartData();
+        if (!_dimensionBlockerFlag)
+            prepareChartData();
         });
 
     //chartcustomization
