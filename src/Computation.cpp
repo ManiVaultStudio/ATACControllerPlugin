@@ -356,9 +356,17 @@ void Computation::prepareChartData()
     QVector<Cluster> metadata = _clusters->getClusters();
 
     std::vector<float> inputVector;
-    _points->extractDataForDimension(inputVector, 0);// FIXME: only intended for ATAC-seq scalars and RNA mapped data
 
-    // TODO: populate SPatial data dimension
+    if (_points->getNumDimensions() == 1)
+        _points->extractDataForDimension(inputVector, 0);// only intended for ATAC-seq scalars and RNA mapped data
+    else if (_points->getNumDimensions() > 1 && _settingsAction.getComputationOptionsHolder().getDimensionPickerAction().getCurrentDimensionIndex() >= 0)
+        _points->extractDataForDimension(inputVector, _settingsAction.getComputationOptionsHolder().getDimensionPickerAction().getCurrentDimensionIndex()); //populate Spatial data dimension
+    else
+    {
+        qDebug() << "No valid dimension selected.";
+        _chartDataProcessing = false;
+        return;
+    }
 
     const int numPoints = static_cast<int>(inputVector.size());
 
