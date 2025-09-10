@@ -199,23 +199,21 @@ void StackedBarChartWidget::sortBars(SortType type)
         }
         m_data = sortedData;
         m_barLabels = sortedBarLabels;*/
-
-        qDebug() << "total " << m_data.size() << m_barLabels.size();
     }
     else if (type == SortByLabel) {
-        QVector<std::pair<QString, int>> labels;
-        for (int i = 0; i < m_barLabels.size(); ++i)
-            labels.append({ m_barLabels[i], i });
-        std::sort(labels.begin(), labels.end(), [](auto& a, auto& b) { return a.first < b.first; });
-        QVector<QVector<float>> sortedData;
-        QStringList sortedBarLabels;
-        for (auto& pair : labels) {
-            sortedData.append(m_data[pair.second]);
-            sortedBarLabels.append(m_barLabels[pair.second]);
-        }
-        m_data = sortedData;
-        m_barLabels = sortedBarLabels;
-        qDebug() << "label " << m_data.size() << m_barLabels.size();
+        // TODO: sort on segment labels instead of bar labels
+        //QVector<std::pair<QString, int>> labels;
+        //for (int i = 0; i < m_barLabels.size(); ++i)
+        //    labels.append({ m_barLabels[i], i });
+        //std::sort(labels.begin(), labels.end(), [](auto& a, auto& b) { return a.first < b.first; });
+        //QVector<QVector<float>> sortedData;
+        //QStringList sortedBarLabels;
+        //for (auto& pair : labels) {
+        //    sortedData.append(m_data[pair.second]);
+        //    sortedBarLabels.append(m_barLabels[pair.second]);
+        //}
+        //m_data = sortedData;
+        //m_barLabels = sortedBarLabels;
     }
     update();
 }

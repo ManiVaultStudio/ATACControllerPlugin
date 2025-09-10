@@ -321,23 +321,23 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setGridColor(color);
         });*/
 
-    connect(&_settingsAction.getChartOptionsHolder().getSortingAction(), &OptionAction::currentIndexChanged, this, [this]() {
-        auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-        if (!chartWidget)
-            return;
+    //connect(&_settingsAction.getChartOptionsHolder().getSortingAction(), &OptionAction::currentIndexChanged, this, [this]() {
+    //    auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
+    //    if (!chartWidget)
+    //        return;
 
-        QString sort = _settingsAction.getChartOptionsHolder().getSortingAction().getCurrentText();
+    //    QString sort = _settingsAction.getChartOptionsHolder().getSortingAction().getCurrentText();
 
-        if (sort == "total")
-        {
-            chartWidget->sortBars(StackedBarChartWidget::SortByTotal);
-        }
-        else if (sort == "label")
-        {
-            chartWidget->sortBars(StackedBarChartWidget::SortByLabel);
-        }
+    //    if (sort == "total")
+    //    {
+    //        chartWidget->sortBars(StackedBarChartWidget::SortByTotal);
+    //    }
+    //    else if (sort == "label")
+    //    {
+    //        chartWidget->sortBars(StackedBarChartWidget::SortByLabel); // TODO: implement
+    //    }
 
-        });
+    //    });
 
     /*connect(&_settingsAction.getChartOptionsHolder().getAnimationDurationAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
