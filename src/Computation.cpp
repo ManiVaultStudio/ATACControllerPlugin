@@ -113,7 +113,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         });
 
     //chartcustomization
-    connect(&_settingsAction.getChartOptionsHolder().getShowLegendAction(), &ToggleAction::toggled, this, [this]() {
+   /* connect(&_settingsAction.getChartOptionsHolder().getShowLegendAction(), &ToggleAction::toggled, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
@@ -188,8 +188,8 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         {
             chartWidget->setLegendStyle(Qt::NoBrush);
         }
+        });*/
 
-        });
     connect(&_settingsAction.getChartOptionsHolder().getRoundedBarsAction(), &ToggleAction::toggled, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -214,7 +214,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         }
 
         });
-    connect(&_settingsAction.getChartOptionsHolder().getBarSpacingAction(), &IntegralAction::valueChanged, this, [this]() {
+  /*  connect(&_settingsAction.getChartOptionsHolder().getBarSpacingAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
@@ -222,7 +222,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         int spacing = _settingsAction.getChartOptionsHolder().getBarSpacingAction().getValue();
         chartWidget->setBarSpacing(spacing);
 
-        });
+        });*/
     connect(&_settingsAction.getChartOptionsHolder().getBarWidthAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -232,7 +232,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setBarWidth(width);
 
         });
-    connect(&_settingsAction.getChartOptionsHolder().getBarBorderColorAction(), &ColorAction::colorChanged, this, [this]() {
+   /* connect(&_settingsAction.getChartOptionsHolder().getBarBorderColorAction(), &ColorAction::colorChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
@@ -249,7 +249,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         int thickness = _settingsAction.getChartOptionsHolder().getBarBorderThicknessAction().getValue();
         chartWidget->setBarBorderThickness(thickness);
 
-        });
+        });*/
     connect(&_settingsAction.getChartOptionsHolder().getBarCornerRadiusAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -259,7 +259,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setBarCornerRadius(radius);
 
         });
-    connect(&_settingsAction.getChartOptionsHolder().getBarOpacityAction(), &DecimalAction::valueChanged, this, [this]() {
+   /* connect(&_settingsAction.getChartOptionsHolder().getBarOpacityAction(), &DecimalAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
@@ -267,7 +267,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         float opacity = _settingsAction.getChartOptionsHolder().getBarOpacityAction().getValue();
         chartWidget->setBarOpacity(opacity);
 
-        });
+        });*/
     connect(&_settingsAction.getChartOptionsHolder().getShowValuesOnSegmentsAction(), &ToggleAction::toggled, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -297,16 +297,14 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setShowGrid(_settingsAction.getChartOptionsHolder().getShowGridAction().isChecked());
 
         });
-    connect(&_settingsAction.getChartOptionsHolder().getGridColorAction(), &ColorAction::colorChanged, this, [this]() {
+    /*connect(&_settingsAction.getChartOptionsHolder().getGridColorAction(), &ColorAction::colorChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
 
         QColor color = _settingsAction.getChartOptionsHolder().getGridColorAction().getColor();
         chartWidget->setGridColor(color);
-
-
-        });
+        });*/
     connect(&_settingsAction.getChartOptionsHolder().getSortingAction(), &OptionAction::currentIndexChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -324,14 +322,14 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         }
 
         });
-    connect(&_settingsAction.getChartOptionsHolder().getAnimationDurationAction(), &IntegralAction::valueChanged, this, [this]() {
+    /*connect(&_settingsAction.getChartOptionsHolder().getAnimationDurationAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
 
         int duration = _settingsAction.getChartOptionsHolder().getAnimationDurationAction().getValue();
         chartWidget->setAnimationDuration(duration);
-        });
+        });*/
     connect(&_settingsAction.getChartOptionsHolder().getHighlightColorAction(), &ColorAction::colorChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -398,7 +396,6 @@ void Computation::prepareChartData()
     chartWidget->clearData();
     chartWidget->setData(barData, segmentLabels);
     chartWidget->setColors(barColors);
-    //chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" }); // TODO: to remove, not needed
 }
 
 std::tuple<QStringList, QVector<QVector<float>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints, int numPoints)
