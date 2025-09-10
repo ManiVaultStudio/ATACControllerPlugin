@@ -21,7 +21,7 @@ public:
     explicit StackedBarChartWidget(QWidget* parent = nullptr);
 
     // Data and appearance
-    void setData(const QVector<QVector<double>>& data, const QStringList& segmentLabels = {});
+    void setData(const QVector<QVector<float>>& data, const QStringList& segmentLabels = {});
     void setColors(const QVector<QColor>& colors);
     void setBarLabels(const QStringList& labels);
     void setShowLegend(bool show);
@@ -65,8 +65,8 @@ private:
     void animateStep();
 
     // Data
-    QVector<QVector<double>> m_data;
-    QVector<QVector<double>> m_animatedData;
+    QVector<QVector<float>> m_data;
+    QVector<QVector<float>> m_animatedData;
     QStringList m_segmentLabels;
     QVector<QColor> m_colors;
     QStringList m_barLabels;

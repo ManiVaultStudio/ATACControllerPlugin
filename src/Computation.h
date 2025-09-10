@@ -55,16 +55,16 @@ public:
     void highlightTriggered();
     void clickTriggered();
 private:
-    std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints); // TODO: to remove
+    std::tuple<QStringList, QVector<QVector<float>>, QVector<QColor>> computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints); // TODO: to remove
 
-    std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints, int numPoints);
+    std::tuple<QStringList, QVector<QVector<float>>, QVector<QColor>> computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints, int numPoints);
 
     void prepareChartData();
 protected:
-    ATACControllerViewPlugin& _viewerPlugin;
-    SettingsAction& _settingsAction;
-    mv::Dataset<Points>     _points;                    /** Points smart pointer */
-    mv::Dataset<Clusters>   _clusters;                  /** Clusters smart pointer */
+    ATACControllerViewPlugin&  _viewerPlugin;
+    SettingsAction&            _settingsAction;
+    mv::Dataset<Points>        _points;                    /** Points smart pointer */
+    mv::Dataset<Clusters>      _clusters;                  /** Clusters smart pointer */
 
     bool _dimensionBlockerFlag = false;
     friend class ChannelAction;

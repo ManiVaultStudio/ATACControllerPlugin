@@ -20,7 +20,7 @@ void StackedBarChartWidget::setUseRoundedBars(bool useRounded)
     update();
 }
 
-void StackedBarChartWidget::setData(const QVector<QVector<double>>& data, const QStringList& segmentLabels)
+void StackedBarChartWidget::setData(const QVector<QVector<float>>& data, const QStringList& segmentLabels)
 {
     m_data = data;
     m_segmentLabels = segmentLabels;
@@ -184,13 +184,13 @@ void StackedBarChartWidget::sortBars(SortType type)
 
     if (type == SortByTotal) {
         // TODO: remove sorting, sorting already done in Computation
-        /*QVector<std::pair<double, int>> totals;
+        /*QVector<std::pair<float, int>> totals;
         for (int i = 0; i < m_data.size(); ++i) {
-            double total = std::accumulate(m_data[i].begin(), m_data[i].end(), 0.0);
+            float total = std::accumulate(m_data[i].begin(), m_data[i].end(), 0.0);
             totals.append({ total, i });
         }
         std::sort(totals.begin(), totals.end(), [](auto& a, auto& b) { return a.first > b.first; });
-        QVector<QVector<double>> sortedData;
+        QVector<QVector<float>> sortedData;
         QStringList sortedBarLabels;
         for (auto& pair : totals) {
             sortedData.append(m_data[pair.second]);
@@ -205,7 +205,7 @@ void StackedBarChartWidget::sortBars(SortType type)
         for (int i = 0; i < m_barLabels.size(); ++i)
             labels.append({ m_barLabels[i], i });
         std::sort(labels.begin(), labels.end(), [](auto& a, auto& b) { return a.first < b.first; });
-        QVector<QVector<double>> sortedData;
+        QVector<QVector<float>> sortedData;
         QStringList sortedBarLabels;
         for (auto& pair : labels) {
             sortedData.append(m_data[pair.second]);
@@ -249,8 +249,8 @@ void StackedBarChartWidget::animateStep()
     }
     for (int i = 0; i < m_data.size(); ++i) {
         for (int j = 0; j < m_data[i].size(); ++j) {
-            double target = m_data[i][j];
-            double current = m_animatedData[i][j];
+            float target = m_data[i][j];
+            float current = m_animatedData[i][j];
             m_animatedData[i][j] = current + (target - current) * 0.1;
         }
     }
@@ -290,9 +290,9 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
     int leftOffset = extraSpace / 2;
 
     // Find max total value for scaling
-    double maxTotal = 0.0;
+    float maxTotal = 0.0;
     for (const auto& bar : m_data) {
-        double total = std::accumulate(bar.begin(), bar.end(), 0.0);
+        float total = std::accumulate(bar.begin(), bar.end(), 0.0);
         maxTotal = std::max(maxTotal, total);
     }
     if (maxTotal == 0.0) maxTotal = 1.0;
@@ -375,14 +375,14 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
             chartRect.bottom() :
             chartRect.top() + leftOffset + i * (barWidth + m_barSpacing);
 
-        double yOffset = 0.0;
-        double xOffset = 0.0;
+        float yOffset = 0.0;
+        float xOffset = 0.0;
         for (int j = 0; j < m_data[i].size(); ++j) {
-            double value = m_animationStep > 0 ? m_animatedData[i][j] : m_data[i][j];
-            double height = m_stackingDirection == Vertical ?
+            float value = m_animationStep > 0 ? m_animatedData[i][j] : m_data[i][j];
+            float height = m_stackingDirection == Vertical ?
                 chartRect.height() * (value / maxTotal) :
                 barWidth;
-            double width = m_stackingDirection == Vertical ?
+            float width = m_stackingDirection == Vertical ?
                 barWidth :
                 chartRect.width() * (value / maxTotal);
 

@@ -385,7 +385,7 @@ void Computation::prepareChartData()
     indices.resize(topCells); // keep only the top ones
 
     QStringList   segmentLabels;
-    QVector<QVector<double>> barData;
+    QVector<QVector<float>> barData;
     QVector<QColor> barColors;
 
     std::tie(segmentLabels, barData, barColors) = computeMetadataCounts(metadata, indices, numPoints);
@@ -396,12 +396,12 @@ void Computation::prepareChartData()
         return;
 
     chartWidget->clearData();
-    chartWidget->setData(barData, segmentLabels); // TODO: if double necessary?
+    chartWidget->setData(barData, segmentLabels);
     chartWidget->setColors(barColors);
     //chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" }); // TODO: to remove, not needed
 }
 
-std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints, int numPoints)
+std::tuple<QStringList, QVector<QVector<float>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints, int numPoints)
 {
     const int nClusters = metadata.size();
 
@@ -434,7 +434,7 @@ std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::
     QStringList labels;
     labels.reserve(static_cast<int>(nonZeroClusters.size()));
 
-    QVector<QVector<double>> data(1);
+    QVector<QVector<float>> data(1);
     data[0].reserve(static_cast<int>(nonZeroClusters.size()));
 
     QVector<QColor> colors;
@@ -442,19 +442,19 @@ std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::
 
     for (const auto& [clusterIndex, count] : nonZeroClusters) {
         labels << metadata[clusterIndex].getName();
-        data[0].append(static_cast<double>(count));
+        data[0].append(static_cast<float>(count));
         colors << metadata[clusterIndex].getColor();
     }
 
     return { labels, data, colors };
 }
 
-std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints)
+std::tuple<QStringList, QVector<QVector<float>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints)
 {
     // TODO: to remove, not used
     // adapted from DualViewPlugin
     QStringList labels;
-    QVector<QVector<double>> data(1);  // one bar, multiple segments
+    QVector<QVector<float>> data(1);  // one bar, multiple segments
     QVector<QColor> colors;
 
     std::unordered_map<int, int> cellToClusterMap; // maps global cell index to cluster index
