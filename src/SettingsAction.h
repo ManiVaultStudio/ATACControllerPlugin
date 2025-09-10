@@ -119,7 +119,7 @@ public:
         OptionAction     _stackdirectionAction;      
         ToggleAction     _showValuesOnSegmentsAction;
         ToggleAction     _showAxesAction;      
-        IntegralAction   _axesFontsizeAction; // FIXME: not working
+        IntegralAction   _axesFontsizeAction;
         ToggleAction     _showGridAction;
         ColorAction      _highlightColorAction;
         OptionAction     _sortingAction; // FIXME: not working

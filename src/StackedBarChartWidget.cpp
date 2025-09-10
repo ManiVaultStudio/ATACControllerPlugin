@@ -199,6 +199,8 @@ void StackedBarChartWidget::sortBars(SortType type)
         }
         m_data = sortedData;
         m_barLabels = sortedBarLabels;*/
+
+        qDebug() << "total " << m_data.size() << m_barLabels.size();
     }
     else if (type == SortByLabel) {
         QVector<std::pair<QString, int>> labels;
@@ -213,6 +215,7 @@ void StackedBarChartWidget::sortBars(SortType type)
         }
         m_data = sortedData;
         m_barLabels = sortedBarLabels;
+        qDebug() << "label " << m_data.size() << m_barLabels.size();
     }
     update();
 }
@@ -515,6 +518,9 @@ void StackedBarChartWidget::resizeEvent(QResizeEvent* event)
 
 void StackedBarChartWidget::mouseMoveEvent(QMouseEvent* event)
 {
+    if (m_data.isEmpty() || m_barRects.isEmpty())
+        return;
+
     int oldBar = m_hoveredBar, oldSeg = m_hoveredSegment, oldLegend = m_hoveredLegendSegment;
     m_hoveredBar = m_hoveredSegment = m_hoveredLegendSegment = -1;
 
@@ -531,13 +537,15 @@ void StackedBarChartWidget::mouseMoveEvent(QMouseEvent* event)
     for (int i = 0; i < m_barRects.size(); ++i) {
         for (int j = 0; j < m_barRects[i].size(); ++j) {
             if (m_barRects[i][j].contains(event->pos())) {
-                m_hoveredBar = i;
-                m_hoveredSegment = j;
-                m_hoveredLegendSegment = j;
-                QString tooltip = QString("%1\nValue: %2")
-                    .arg(m_segmentLabels.value(j, QString("Segment %1").arg(j + 1)))
-                    .arg(m_data[i][j]);
-                QToolTip::showText(event->globalPos(), tooltip, this);
+                if (i < m_data.size() && j < m_data[i].size()) {
+                    m_hoveredBar = i;
+                    m_hoveredSegment = j;
+                    m_hoveredLegendSegment = j;
+                    QString tooltip = QString("%1\nValue: %2")
+                        .arg(m_segmentLabels.value(j, QString("Segment %1").arg(j + 1)))
+                        .arg(m_data[i][j]);
+                    QToolTip::showText(event->globalPos(), tooltip, this);
+                }
                 update();
                 return;
             }
