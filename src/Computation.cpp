@@ -63,13 +63,8 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         prepareChartData();
         });
 
-    connect(&_points, &Dataset<Points>::dataDimensionsChanged, this, [this]() {
-        qDebug() << "_points dataDimensionsChanged";
-        prepareChartData();
-        });
-
     connect(&_settingsAction.getDataOptionsHolder().getPointDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
-        qDebug() << "getPointDatasetAction() changed";
+        qDebug() << "getPointDatasetAction() currentIndexChanged";
 
         if (_settingsAction.getDataOptionsHolder().getPointDatasetAction().getCurrentDataset().isValid())
         {
@@ -84,7 +79,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         });
 
     connect(&_settingsAction.getDataOptionsHolder().getClusterDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
-        qDebug() << "getClusterDatasetAction() changed";
+        qDebug() << "getClusterDatasetAction() currentIndexChanged";
 
         if (_settingsAction.getDataOptionsHolder().getClusterDatasetAction().getCurrentDataset().isValid())
         {
@@ -97,8 +92,8 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         });
 
     connect(&_settingsAction.getComputationOptionsHolder().getDimensionPickerAction(), &DimensionPickerAction::currentDimensionIndexChanged, this, [this]() {
-        qDebug() << "dimensionPicker changed";
-        prepareChartData(); // FIXME: is it only intended for Spatial data?
+        qDebug() << "getDimensionPickerAction() currentDimensionIndexChanged";
+        prepareChartData();
         });
 
     //chartcustomization
@@ -329,7 +324,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setHighlightColor(color);
         });
 
-    auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
+    //auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
     //if (chartWidget)
     //{
     //    //chartWidget->setAxisFont(QFont("Arial", 10));
@@ -339,19 +334,11 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
 
 void Computation::prepareChartData()
 {
-    if (_chartDataProcessing)
-    {
-        qDebug() << "_chartDataProcessing is true, so return";
-        return;
-    }
-
     if (!_points.isValid() || !_clusters.isValid())
     {
         qDebug() << "Invalid points or clusters dataset.";
         return;
     }
-
-    _chartDataProcessing = true;
 
     QVector<Cluster> metadata = _clusters->getClusters();
 
@@ -364,7 +351,6 @@ void Computation::prepareChartData()
     else
     {
         qDebug() << "No valid dimension selected.";
-        _chartDataProcessing = false;
         return;
     }
 
@@ -387,6 +373,7 @@ void Computation::prepareChartData()
     QVector<QColor> barColors;
 
     std::tie(segmentLabels, barData, barColors) = computeMetadataCounts(metadata, indices, numPoints);
+    qDebug() << "proportion computed for " << _points->getGuiName() << _clusters->getGuiName(); 
 
     auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
     if (!chartWidget)
@@ -396,8 +383,6 @@ void Computation::prepareChartData()
     chartWidget->setData(barData, segmentLabels); // TODO: if double necessary?
     chartWidget->setColors(barColors);
     //chartWidget->setAxisLabels(QStringList{ "X Axis", "Y Axis" }); // TODO: to remove, not needed
-
-    _chartDataProcessing = false;
 }
 
 std::tuple<QStringList, QVector<QVector<double>>, QVector<QColor>> Computation::computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints, int numPoints)
