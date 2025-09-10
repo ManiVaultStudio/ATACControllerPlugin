@@ -254,7 +254,7 @@ void SettingsAction::fromVariantMap(const QVariantMap& variantMap)
 
     //_chartOptionsHolder.getShowLegendAction().fromParentVariantMap(variantMap);
     //_chartOptionsHolder.getLegendPositionAction().fromParentVariantMap(variantMap);
-    //_chartOptionsHolder.getLegendFontsizeAction().fromParentVariantMap(variantMap);
+    _chartOptionsHolder.getLegendFontsizeAction().fromParentVariantMap(variantMap);
     //_chartOptionsHolder.getLegendStyleAction().fromParentVariantMap(variantMap);
     _chartOptionsHolder.getRoundedBarsAction().fromParentVariantMap(variantMap);
     _chartOptionsHolder.getStackdirectionAction().fromParentVariantMap(variantMap);
@@ -284,7 +284,7 @@ QVariantMap SettingsAction::toVariantMap() const
 
     //_chartOptionsHolder.getShowLegendAction().insertIntoVariantMap(variantMap);
     //_chartOptionsHolder.getLegendPositionAction().insertIntoVariantMap(variantMap);
-    //_chartOptionsHolder.getLegendFontsizeAction().insertIntoVariantMap(variantMap);
+    _chartOptionsHolder.getLegendFontsizeAction().insertIntoVariantMap(variantMap);
     //_chartOptionsHolder.getLegendStyleAction().insertIntoVariantMap(variantMap);
     _chartOptionsHolder.getRoundedBarsAction().insertIntoVariantMap(variantMap);
     _chartOptionsHolder.getStackdirectionAction().insertIntoVariantMap(variantMap);

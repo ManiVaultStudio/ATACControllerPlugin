@@ -113,15 +113,14 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         });
 
     //chartcustomization
-   /* connect(&_settingsAction.getChartOptionsHolder().getShowLegendAction(), &ToggleAction::toggled, this, [this]() {
+    /*connect(&_settingsAction.getChartOptionsHolder().getShowLegendAction(), &ToggleAction::toggled, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
-
         chartWidget->setShowLegend(_settingsAction.getChartOptionsHolder().getShowLegendAction().isChecked());
+        });*/
 
-        });
-    connect(&_settingsAction.getChartOptionsHolder().getLegendPositionAction(), &OptionAction::currentIndexChanged, this, [this]() {
+    /*connect(&_settingsAction.getChartOptionsHolder().getLegendPositionAction(), &OptionAction::currentIndexChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
@@ -144,7 +143,8 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
             chartWidget->setLegendPosition(StackedBarChartWidget::LegendBottom);
         }
 
-        });
+        });*/
+
     connect(&_settingsAction.getChartOptionsHolder().getLegendFontsizeAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -154,41 +154,42 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setLegendFont(QFont("Arial", fontSize));
 
         });
-    connect(&_settingsAction.getChartOptionsHolder().getLegendStyleAction(), &OptionAction::currentIndexChanged, this, [this]() {
-        auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-        if (!chartWidget)
-            return;
 
-        QString style = _settingsAction.getChartOptionsHolder().getLegendStyleAction().getCurrentText();
-        if (style == "solid")
-        {
-            chartWidget->setLegendStyle(Qt::SolidPattern);
-        }
-        else if (style == "dense")
-        {
-            chartWidget->setLegendStyle(Qt::Dense1Pattern);
-        }
-        else if (style == "dashed")
-        {
-            chartWidget->setLegendStyle(Qt::DiagCrossPattern);
-        }
-        else if (style == "crossed")
-        {
-            chartWidget->setLegendStyle(Qt::CrossPattern);
-        }
-        else if (style == "horizontal")
-        {
-            chartWidget->setLegendStyle(Qt::HorPattern);
-        }
-        else if (style == "vertical")
-        {
-            chartWidget->setLegendStyle(Qt::VerPattern);
-        }
-        else if (style == "no brush")
-        {
-            chartWidget->setLegendStyle(Qt::NoBrush);
-        }
-        });*/
+    //connect(&_settingsAction.getChartOptionsHolder().getLegendStyleAction(), &OptionAction::currentIndexChanged, this, [this]() {
+    //    auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
+    //    if (!chartWidget)
+    //        return;
+
+    //    QString style = _settingsAction.getChartOptionsHolder().getLegendStyleAction().getCurrentText();
+    //    if (style == "solid")
+    //    {
+    //        chartWidget->setLegendStyle(Qt::SolidPattern);
+    //    }
+    //    else if (style == "dense")
+    //    {
+    //        chartWidget->setLegendStyle(Qt::Dense1Pattern);
+    //    }
+    //    else if (style == "dashed")
+    //    {
+    //        chartWidget->setLegendStyle(Qt::DiagCrossPattern);
+    //    }
+    //    else if (style == "crossed")
+    //    {
+    //        chartWidget->setLegendStyle(Qt::CrossPattern);
+    //    }
+    //    else if (style == "horizontal")
+    //    {
+    //        chartWidget->setLegendStyle(Qt::HorPattern);
+    //    }
+    //    else if (style == "vertical")
+    //    {
+    //        chartWidget->setLegendStyle(Qt::VerPattern);
+    //    }
+    //    else if (style == "no brush")
+    //    {
+    //        chartWidget->setLegendStyle(Qt::NoBrush);
+    //    }
+    //    });
 
     connect(&_settingsAction.getChartOptionsHolder().getRoundedBarsAction(), &ToggleAction::toggled, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
@@ -198,6 +199,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setUseRoundedBars(_settingsAction.getChartOptionsHolder().getRoundedBarsAction().isChecked());
 
         });
+
     connect(&_settingsAction.getChartOptionsHolder().getStackdirectionAction(), &OptionAction::currentIndexChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -214,15 +216,17 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         }
 
         });
-  /*  connect(&_settingsAction.getChartOptionsHolder().getBarSpacingAction(), &IntegralAction::valueChanged, this, [this]() {
-        auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-        if (!chartWidget)
-            return;
 
-        int spacing = _settingsAction.getChartOptionsHolder().getBarSpacingAction().getValue();
-        chartWidget->setBarSpacing(spacing);
+    /*  connect(&_settingsAction.getChartOptionsHolder().getBarSpacingAction(), &IntegralAction::valueChanged, this, [this]() {
+          auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
+          if (!chartWidget)
+              return;
 
-        });*/
+          int spacing = _settingsAction.getChartOptionsHolder().getBarSpacingAction().getValue();
+          chartWidget->setBarSpacing(spacing);
+
+          });*/
+
     connect(&_settingsAction.getChartOptionsHolder().getBarWidthAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -232,24 +236,26 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setBarWidth(width);
 
         });
-   /* connect(&_settingsAction.getChartOptionsHolder().getBarBorderColorAction(), &ColorAction::colorChanged, this, [this]() {
-        auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-        if (!chartWidget)
-            return;
 
-        QColor color = _settingsAction.getChartOptionsHolder().getBarBorderColorAction().getColor();
-        chartWidget->setBarBorderColor(color);
+    /* connect(&_settingsAction.getChartOptionsHolder().getBarBorderColorAction(), &ColorAction::colorChanged, this, [this]() {
+         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
+         if (!chartWidget)
+             return;
 
-        });
-    connect(&_settingsAction.getChartOptionsHolder().getBarBorderThicknessAction(), &IntegralAction::valueChanged, this, [this]() {
-        auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-        if (!chartWidget)
-            return;
+         QColor color = _settingsAction.getChartOptionsHolder().getBarBorderColorAction().getColor();
+         chartWidget->setBarBorderColor(color);
 
-        int thickness = _settingsAction.getChartOptionsHolder().getBarBorderThicknessAction().getValue();
-        chartWidget->setBarBorderThickness(thickness);
+         });
+     connect(&_settingsAction.getChartOptionsHolder().getBarBorderThicknessAction(), &IntegralAction::valueChanged, this, [this]() {
+         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
+         if (!chartWidget)
+             return;
 
-        });*/
+         int thickness = _settingsAction.getChartOptionsHolder().getBarBorderThicknessAction().getValue();
+         chartWidget->setBarBorderThickness(thickness);
+
+         });*/
+
     connect(&_settingsAction.getChartOptionsHolder().getBarCornerRadiusAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -259,15 +265,17 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setBarCornerRadius(radius);
 
         });
-   /* connect(&_settingsAction.getChartOptionsHolder().getBarOpacityAction(), &DecimalAction::valueChanged, this, [this]() {
-        auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-        if (!chartWidget)
-            return;
 
-        float opacity = _settingsAction.getChartOptionsHolder().getBarOpacityAction().getValue();
-        chartWidget->setBarOpacity(opacity);
+    /* connect(&_settingsAction.getChartOptionsHolder().getBarOpacityAction(), &DecimalAction::valueChanged, this, [this]() {
+         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
+         if (!chartWidget)
+             return;
 
-        });*/
+         float opacity = _settingsAction.getChartOptionsHolder().getBarOpacityAction().getValue();
+         chartWidget->setBarOpacity(opacity);
+
+         });*/
+
     connect(&_settingsAction.getChartOptionsHolder().getShowValuesOnSegmentsAction(), &ToggleAction::toggled, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -276,6 +284,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setShowValuesOnSegments(_settingsAction.getChartOptionsHolder().getShowValuesOnSegmentsAction().isChecked());
 
         });
+
     connect(&_settingsAction.getChartOptionsHolder().getShowAxesAction(), &ToggleAction::toggled, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -284,11 +293,16 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setShowAxes(_settingsAction.getChartOptionsHolder().getShowAxesAction().isChecked());
 
         });
+
     connect(&_settingsAction.getChartOptionsHolder().getAxesFontsizeAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
             return;
+
+        int fontSize = _settingsAction.getChartOptionsHolder().getAxesFontsizeAction().getValue();
+        chartWidget->setAxisFont(QFont("Arial", fontSize));
         });
+
     connect(&_settingsAction.getChartOptionsHolder().getShowGridAction(), &ToggleAction::toggled, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -297,6 +311,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setShowGrid(_settingsAction.getChartOptionsHolder().getShowGridAction().isChecked());
 
         });
+
     /*connect(&_settingsAction.getChartOptionsHolder().getGridColorAction(), &ColorAction::colorChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -305,6 +320,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         QColor color = _settingsAction.getChartOptionsHolder().getGridColorAction().getColor();
         chartWidget->setGridColor(color);
         });*/
+
     connect(&_settingsAction.getChartOptionsHolder().getSortingAction(), &OptionAction::currentIndexChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -322,6 +338,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         }
 
         });
+
     /*connect(&_settingsAction.getChartOptionsHolder().getAnimationDurationAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -330,6 +347,7 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         int duration = _settingsAction.getChartOptionsHolder().getAnimationDurationAction().getValue();
         chartWidget->setAnimationDuration(duration);
         });*/
+
     connect(&_settingsAction.getChartOptionsHolder().getHighlightColorAction(), &ColorAction::colorChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
         if (!chartWidget)
@@ -387,7 +405,7 @@ void Computation::prepareChartData()
     QVector<QColor> barColors;
 
     std::tie(segmentLabels, barData, barColors) = computeMetadataCounts(metadata, indices, numPoints);
-    qDebug() << "proportion computed for " << _points->getGuiName() << _clusters->getGuiName(); 
+    qDebug() << "proportion computed for " << _points->getGuiName() << _clusters->getGuiName();
 
     auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
     if (!chartWidget)
