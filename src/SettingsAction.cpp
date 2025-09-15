@@ -172,7 +172,7 @@ inline SettingsAction::ComputationOptionsHolder::ComputationOptionsHolder(Settin
     _settingsOptions(settingsAction),
     _dimensionPickerAction(this, "Dimension")
 {
-    setText("Dataset1 Options");
+    setText("Computation Options");
     setIcon(mv::util::StyledIcon("database"));
     setPopupSizeHint(QSize(300, 0));
     setConfigurationFlag(WidgetAction::ConfigurationFlag::Default);
@@ -185,7 +185,7 @@ inline SettingsAction::DataOptionsHolder::DataOptionsHolder(SettingsAction& sett
     _pointDatasetAction(this, "Point dataset"),
     _clusterDatasetAction(this, "Cluster dataset")
 {
-    setText("Dataset1 Options");
+    setText("Data Options");
     setIcon(mv::util::StyledIcon("database"));
     setPopupSizeHint(QSize(300, 0));
     setConfigurationFlag(WidgetAction::ConfigurationFlag::Default);
@@ -218,7 +218,7 @@ inline SettingsAction::ChartOptionsHolder::ChartOptionsHolder(SettingsAction& se
     //_sortingAction(this, "Sorting")
     //_animationDurationAction(this, "Animation Duration")
 {
-    setText("Dataset1 Options");
+    setText("Chart Options");
     setIcon(mv::util::StyledIcon("database"));
     setPopupSizeHint(QSize(300, 0));
     setConfigurationFlag(WidgetAction::ConfigurationFlag::Default);
