@@ -88,8 +88,6 @@ public:
         ToggleAction& getShowGridAction() { return _showGridAction; }
         //const ColorAction& getGridColorAction() const { return _gridColorAction; }
         //ColorAction& getGridColorAction() { return _gridColorAction; }
-        /*const OptionAction& getSortingAction() const { return _sortingAction; }
-        OptionAction& getSortingAction() { return _sortingAction; }*/
         //const IntegralAction& getAnimationDurationAction() const { return _animationDurationAction; }
         //IntegralAction& getAnimationDurationAction() { return _animationDurationAction; }
         const ColorAction& getHighlightColorAction() const { return _highlightColorAction; }
@@ -111,7 +109,6 @@ public:
         //DecimalAction    _barOpacityAction;
         //ColorAction      _gridColorAction;
         //IntegralAction   _animationDurationAction;
-        //OptionAction     _sortingAction; // FIXME: not working
 
         IntegralAction   _legendFontsizeAction;       
         ToggleAction     _roundedBarsAction;

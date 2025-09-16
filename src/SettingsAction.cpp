@@ -148,12 +148,6 @@ SettingsAction::SettingsAction(ATACControllerViewPlugin& ATACControllerViewPlugi
     //_chartOptionsHolder.getGridColorAction().setDefaultWidgetFlags(ColorAction::Basic);
     //_chartOptionsHolder.getGridColorAction().setColor(Qt::lightGray);
 
-    /*_chartOptionsHolder.getSortingAction().setSerializationName("ATACController:ChartCustomization:Sorting");
-    _chartOptionsHolder.getSortingAction().setToolTip("Sorting");
-    _chartOptionsHolder.getSortingAction().setDefaultWidgetFlags(OptionAction::ComboBox);
-    _chartOptionsHolder.getSortingAction().setOptions({ "total","label" });
-    _chartOptionsHolder.getSortingAction().setCurrentText("total");*/
-
     //_chartOptionsHolder.getAnimationDurationAction().setSerializationName("ATACController:ChartCustomization:Animation Duration");
     //_chartOptionsHolder.getAnimationDurationAction().setToolTip("Animation Duration");
     //_chartOptionsHolder.getAnimationDurationAction().setDefaultWidgetFlags(IntegralAction::Slider);
@@ -215,7 +209,6 @@ inline SettingsAction::ChartOptionsHolder::ChartOptionsHolder(SettingsAction& se
     _showGridAction(this, "Show Grid"),
     //_gridColorAction(this, "Grid Color"),
     _highlightColorAction(this, "Highlight Color")
-    //_sortingAction(this, "Sorting")
     //_animationDurationAction(this, "Animation Duration")
 {
     setText("Chart Options");
@@ -241,7 +234,6 @@ inline SettingsAction::ChartOptionsHolder::ChartOptionsHolder(SettingsAction& se
     addAction(&_showGridAction);
     //addAction(&_gridColorAction);
     addAction(&_highlightColorAction);
-    //addAction(&_sortingAction);
     //addAction(&_animationDurationAction);
 }
 
@@ -269,7 +261,6 @@ void SettingsAction::fromVariantMap(const QVariantMap& variantMap)
     _chartOptionsHolder.getAxesFontsizeAction().fromParentVariantMap(variantMap);
     _chartOptionsHolder.getShowGridAction().fromParentVariantMap(variantMap);
     //_chartOptionsHolder.getGridColorAction().fromParentVariantMap(variantMap);
-    //_chartOptionsHolder.getSortingAction().fromParentVariantMap(variantMap);
     //_chartOptionsHolder.getAnimationDurationAction().fromParentVariantMap(variantMap);
     _chartOptionsHolder.getHighlightColorAction().fromParentVariantMap(variantMap);
 
@@ -299,7 +290,6 @@ QVariantMap SettingsAction::toVariantMap() const
     _chartOptionsHolder.getAxesFontsizeAction().insertIntoVariantMap(variantMap);
     _chartOptionsHolder.getShowGridAction().insertIntoVariantMap(variantMap);
     //_chartOptionsHolder.getGridColorAction().insertIntoVariantMap(variantMap);
-    //_chartOptionsHolder.getSortingAction().insertIntoVariantMap(variantMap);
     //_chartOptionsHolder.getAnimationDurationAction().insertIntoVariantMap(variantMap);
     _chartOptionsHolder.getHighlightColorAction().insertIntoVariantMap(variantMap);
 

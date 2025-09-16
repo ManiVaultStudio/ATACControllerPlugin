@@ -16,7 +16,6 @@ class StackedBarChartWidget : public QWidget
 public:
     enum LegendPosition { LegendRight, LegendLeft, LegendTop, LegendBottom };
     enum StackingDirection { Vertical, Horizontal };
-    enum SortType { SortByTotal, SortByLabel };
 
     explicit StackedBarChartWidget(QWidget* parent = nullptr);
 
@@ -45,7 +44,6 @@ public:
     void setHighlightColor(const QColor& color);
     void setHighlightColors(const QVector<QColor>& colors);
     void setAnimationDuration(int duration);
-    void sortBars(SortType type);
     void clearData();
 
 signals:

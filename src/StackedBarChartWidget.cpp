@@ -179,45 +179,6 @@ void StackedBarChartWidget::setAnimationDuration(int duration)
     m_animationDuration = duration;
 }
 
-void StackedBarChartWidget::sortBars(SortType type)
-{
-
-    if (type == SortByTotal) {
-        // TODO: remove sorting, sorting already done in Computation
-        /*QVector<std::pair<float, int>> totals;
-        for (int i = 0; i < m_data.size(); ++i) {
-            float total = std::accumulate(m_data[i].begin(), m_data[i].end(), 0.0);
-            totals.append({ total, i });
-        }
-        std::sort(totals.begin(), totals.end(), [](auto& a, auto& b) { return a.first > b.first; });
-        QVector<QVector<float>> sortedData;
-        QStringList sortedBarLabels;
-        for (auto& pair : totals) {
-            sortedData.append(m_data[pair.second]);
-            if (pair.second < m_barLabels.size())
-                sortedBarLabels.append(m_barLabels[pair.second]);
-        }
-        m_data = sortedData;
-        m_barLabels = sortedBarLabels;*/
-    }
-    else if (type == SortByLabel) {
-        // TODO: sort on segment labels instead of bar labels
-        //QVector<std::pair<QString, int>> labels;
-        //for (int i = 0; i < m_barLabels.size(); ++i)
-        //    labels.append({ m_barLabels[i], i });
-        //std::sort(labels.begin(), labels.end(), [](auto& a, auto& b) { return a.first < b.first; });
-        //QVector<QVector<float>> sortedData;
-        //QStringList sortedBarLabels;
-        //for (auto& pair : labels) {
-        //    sortedData.append(m_data[pair.second]);
-        //    sortedBarLabels.append(m_barLabels[pair.second]);
-        //}
-        //m_data = sortedData;
-        //m_barLabels = sortedBarLabels;
-    }
-    update();
-}
-
 void StackedBarChartWidget::clearData()
 {
     m_data.clear();
@@ -470,28 +431,33 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
     painter.setPen(Qt::black);
 
     m_legendItemRects.clear();
+    m_legendItemRects.resize(m_segmentLabels.size()); // Pre-allocate to correct size
 
     int itemHeight = 20;
     int y = rect.top();
     int x = rect.left();
     int count = m_segmentLabels.size();
-    for (int i = 0; i < count; ++i) {
-        QRect itemRect(x, y, 20, 15);
-        m_legendItemRects.append(itemRect);
 
-        QColor color = (i < m_colors.size()) ? m_colors[i] : Qt::gray;
+    // Draw legend items in reverse order to match bar stacking
+    for (int visualIndex = 0; visualIndex < count; ++visualIndex) {
+        int segmentIndex = count - 1 - visualIndex; // Reverse mapping
+
+        QRect itemRect(x, y, 20, 15);
+        m_legendItemRects[segmentIndex] = itemRect; // Store at correct index
+
+        QColor color = (segmentIndex < m_colors.size()) ? m_colors[segmentIndex] : Qt::gray;
         QBrush brush(color, m_legendStyle);
 
         // Highlight on selection
-        if (i == m_highlightedLegendSegment) {
+        if (segmentIndex == m_highlightedLegendSegment) {
             QColor highlight = m_highlightColors.isEmpty() ? m_highlightColor
-                : (i < m_highlightColors.size() ? m_highlightColors[i] : m_highlightColor);
+                : (segmentIndex < m_highlightColors.size() ? m_highlightColors[segmentIndex] : m_highlightColor);
             painter.setBrush(highlight);
         }
         // Highlight on hover
-        else if (i == m_hoveredLegendSegment) {
+        else if (segmentIndex == m_hoveredLegendSegment) {
             QColor highlight = m_highlightColors.isEmpty() ? m_highlightColor
-                : (i < m_highlightColors.size() ? m_highlightColors[i] : m_highlightColor);
+                : (segmentIndex < m_highlightColors.size() ? m_highlightColors[segmentIndex] : m_highlightColor);
             painter.setBrush(highlight.lighter(130));
         }
         else {
@@ -500,7 +466,7 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
 
         painter.drawRect(itemRect);
 
-        QString label = m_segmentLabels.isEmpty() ? QString("Segment %1").arg(i + 1) : m_segmentLabels[i];
+        QString label = m_segmentLabels.isEmpty() ? QString("Segment %1").arg(segmentIndex + 1) : m_segmentLabels[segmentIndex];
         painter.drawText(x + 25, y + 13, label);
 
         y += itemHeight;
