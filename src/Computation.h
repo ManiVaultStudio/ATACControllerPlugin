@@ -65,7 +65,7 @@ protected:
     SettingsAction&            _settingsAction;
     mv::Dataset<Points>        _points;                    /** Points smart pointer */
     mv::Dataset<Clusters>      _clusters;                  /** Clusters smart pointer */
-
-    bool _dimensionBlockerFlag = false;
+    bool                       _loadingProjectFlag = false;
+    bool                       _dimensionBlockerFlag = false;
     friend class ChannelAction;
 };
