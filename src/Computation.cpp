@@ -43,28 +43,39 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
     _viewerPlugin(ATACControllerViewPlugin),
     _settingsAction(SettingsAction)
 {
-    connect(&_points, &Dataset<Points>::changed, this, [this]() {
-        qDebug() << "_points changed";
-        prepareChartData();
-        });
-
-    connect(&_clusters, &Dataset<Clusters>::changed, this, [this]() {
-        qDebug() << "_clusters changed";
-        prepareChartData();
-        });
+    if (mv::projects().isOpeningProject()) 
+    {
+            _loadingProjectFlag = true;
+            connect(&mv::projects(), &AbstractProjectManager::projectOpened, this, [this]() {
+                _loadingProjectFlag = false;
+                prepareChartData();
+                });
+    }
 
     connect(&_points, &Dataset<Points>::dataChanged, this, [this]() {
-        qDebug() << "_points dataChanged";
+        //qDebug() << "_points dataChanged";
+        //qDebug() << "_points dataChanged _points gui name" << _points->getGuiName();
         prepareChartData();
         });
 
     connect(&_clusters, &Dataset<Clusters>::dataChanged, this, [this]() {
-        qDebug() << "_clusters dataChanged";
+        //qDebug() << "_clusters dataChanged";
+        prepareChartData();
+        });
+
+    connect(&_points, &Dataset<Points>::changed, this, [this]() {
+        //qDebug() << "_points changed";
+        //qDebug() << "_points changed _points gui name" << _points->getGuiName();
+        prepareChartData();
+        });
+
+    connect(&_clusters, &Dataset<Clusters>::changed, this, [this]() {
+        //qDebug() << "_clusters dataChanged";
         prepareChartData();
         });
 
     connect(&_points, &Dataset<Points>::dataDimensionsChanged, this, [this]() {
-        qDebug() << "_points dataDimensionsChanged";
+        //qDebug() << "_points dataDimensionsChanged";
         if (_settingsAction.getDataOptionsHolder().getPointDatasetAction().getCurrentDataset().isValid())
         {
             _dimensionBlockerFlag = true;
@@ -79,71 +90,49 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
 
 
     connect(&_settingsAction.getDataOptionsHolder().getPointDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
-        qDebug() << "getPointDatasetAction() currentIndexChanged";
+        //qDebug() << "getPointDatasetAction() currentIndexChanged";
 
         if (_settingsAction.getDataOptionsHolder().getPointDatasetAction().getCurrentDataset().isValid())
         {
+            //qDebug() << "getPointDatasetAction() currentIndexChanged 2" << _points->getGuiName();
+            _dimensionBlockerFlag = true;
             _settingsAction.getComputationOptionsHolder().getDimensionPickerAction().setPointsDataset(_settingsAction.getDataOptionsHolder().getPointDatasetAction().getCurrentDataset());
+           // qDebug() << "getPointDatasetAction() currentIndexChanged 3" << _points->getGuiName();
+            _dimensionBlockerFlag = false;
+            //qDebug() << "_points set";
             _points = _settingsAction.getDataOptionsHolder().getPointDatasetAction().getCurrentDataset();
+            //qDebug() << "getPointDatasetAction() currentIndexChanged 4 " << _points->getGuiName();
         }
         else
         {
+            //qDebug() << "getPointDatasetAction() currentIndexChanged 5" << _points->getGuiName();
             _settingsAction.getComputationOptionsHolder().getDimensionPickerAction().setPointsDataset(Dataset<Points>());
             _points = Dataset<Points>();
+            //qDebug() << "getPointDatasetAction() currentIndexChanged 6";
         }
         });
 
     connect(&_settingsAction.getDataOptionsHolder().getClusterDatasetAction(), &DatasetPickerAction::currentIndexChanged, this, [this]() {
-        qDebug() << "getClusterDatasetAction() currentIndexChanged";
+        //qDebug() << "getClusterDatasetAction() currentIndexChanged";
 
         if (_settingsAction.getDataOptionsHolder().getClusterDatasetAction().getCurrentDataset().isValid())
         {
+            //qDebug() << "getClusterDatasetAction() currentIndexChanged 2" << _clusters->getGuiName();
             _clusters = _settingsAction.getDataOptionsHolder().getClusterDatasetAction().getCurrentDataset();
+            //qDebug() << "getClusterDatasetAction() currentIndexChanged 3" << _clusters->getGuiName();
         }
         else
         {
             _clusters = Dataset<Clusters>();
+            //qDebug() << "getClusterDatasetAction() currentIndexChanged 4";
         }
         });
 
     connect(&_settingsAction.getComputationOptionsHolder().getDimensionPickerAction(), &DimensionPickerAction::currentDimensionIndexChanged, this, [this]() {
-        qDebug() << "getDimensionPickerAction() currentDimensionIndexChanged";
+        //qDebug() << "getDimensionPickerAction() currentDimensionIndexChanged";
         if (!_dimensionBlockerFlag)
             prepareChartData();
         });
-
-    //chartcustomization
-    /*connect(&_settingsAction.getChartOptionsHolder().getShowLegendAction(), &ToggleAction::toggled, this, [this]() {
-        auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-        if (!chartWidget)
-            return;
-        chartWidget->setShowLegend(_settingsAction.getChartOptionsHolder().getShowLegendAction().isChecked());
-        });*/
-
-    /*connect(&_settingsAction.getChartOptionsHolder().getLegendPositionAction(), &OptionAction::currentIndexChanged, this, [this]() {
-        auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-        if (!chartWidget)
-            return;
-
-        QString pos = _settingsAction.getChartOptionsHolder().getLegendPositionAction().getCurrentText();
-        if (pos == "right")
-        {
-            chartWidget->setLegendPosition(StackedBarChartWidget::LegendRight);
-        }
-        else if (pos == "left")
-        {
-            chartWidget->setLegendPosition(StackedBarChartWidget::LegendLeft);
-        }
-        else if (pos == "top")
-        {
-            chartWidget->setLegendPosition(StackedBarChartWidget::LegendTop);
-        }
-        else if (pos == "bottom")
-        {
-            chartWidget->setLegendPosition(StackedBarChartWidget::LegendBottom);
-        }
-
-        });*/
 
     connect(&_settingsAction.getChartOptionsHolder().getLegendFontsizeAction(), &IntegralAction::valueChanged, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
@@ -154,42 +143,6 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
         chartWidget->setLegendFont(QFont("Arial", fontSize));
 
         });
-
-    //connect(&_settingsAction.getChartOptionsHolder().getLegendStyleAction(), &OptionAction::currentIndexChanged, this, [this]() {
-    //    auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
-    //    if (!chartWidget)
-    //        return;
-
-    //    QString style = _settingsAction.getChartOptionsHolder().getLegendStyleAction().getCurrentText();
-    //    if (style == "solid")
-    //    {
-    //        chartWidget->setLegendStyle(Qt::SolidPattern);
-    //    }
-    //    else if (style == "dense")
-    //    {
-    //        chartWidget->setLegendStyle(Qt::Dense1Pattern);
-    //    }
-    //    else if (style == "dashed")
-    //    {
-    //        chartWidget->setLegendStyle(Qt::DiagCrossPattern);
-    //    }
-    //    else if (style == "crossed")
-    //    {
-    //        chartWidget->setLegendStyle(Qt::CrossPattern);
-    //    }
-    //    else if (style == "horizontal")
-    //    {
-    //        chartWidget->setLegendStyle(Qt::HorPattern);
-    //    }
-    //    else if (style == "vertical")
-    //    {
-    //        chartWidget->setLegendStyle(Qt::VerPattern);
-    //    }
-    //    else if (style == "no brush")
-    //    {
-    //        chartWidget->setLegendStyle(Qt::NoBrush);
-    //    }
-    //    });
 
     connect(&_settingsAction.getChartOptionsHolder().getRoundedBarsAction(), &ToggleAction::toggled, this, [this]() {
         auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
@@ -366,6 +319,8 @@ Computation::Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, Set
 
 void Computation::prepareChartData()
 {
+    if(_loadingProjectFlag)
+        return;
     if (!_points.isValid() || !_clusters.isValid())
     {
         qDebug() << "Invalid points or clusters dataset.";
