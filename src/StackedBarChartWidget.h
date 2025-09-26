@@ -47,8 +47,7 @@ public:
     void clearData();
 
 signals:
-    void barSegmentClicked(int barIndex, int segmentIndex);
-    void barSegmentSelected(int barIndex, int segmentIndex);
+    void barSegmentClicked(int barIndex, int segmentIndex, QString barName, QString segmentName);
 
 protected:
     void paintEvent(QPaintEvent* event) override;

@@ -579,14 +579,12 @@ void StackedBarChartWidget::mousePressEvent(QMouseEvent* event)
                 m_highlightedLegendSegment = -1;
                 m_highlightedBar = -1;
                 m_highlightedSegment = -1;
-                emit barSegmentSelected(-1, -1);
             }
             else {
                 m_highlightedLegendSegment = seg;
                 m_highlightedBar = -1;
                 m_highlightedSegment = seg;
-                emit barSegmentClicked(-1, seg);
-                emit barSegmentSelected(-1, seg);
+                emit barSegmentClicked(-1, seg, QString(), m_segmentLabels.value(seg));
             }
             update();
             return;
@@ -599,18 +597,18 @@ void StackedBarChartWidget::mousePressEvent(QMouseEvent* event)
         for (int j = 0; j < m_barRects[i].size(); ++j) {
             if (m_barRects[i][j].contains(event->pos())) {
                 found = true;
+                QString barName = m_barLabels.value(i, QString("Bar %1").arg(i + 1));
+                QString segmentName = m_segmentLabels.value(j, QString("Segment %1").arg(j + 1));
                 if (m_highlightedBar == i && m_highlightedSegment == j) {
                     m_highlightedBar = -1;
                     m_highlightedSegment = -1;
                     m_highlightedLegendSegment = -1;
-                    emit barSegmentSelected(-1, -1);
                 }
                 else {
                     m_highlightedBar = i;
                     m_highlightedSegment = j;
                     m_highlightedLegendSegment = j;
-                    emit barSegmentClicked(i, j);
-                    emit barSegmentSelected(i, j);
+                    emit barSegmentClicked(i, j, barName, segmentName);
                 }
                 update();
                 return;
@@ -622,7 +620,6 @@ void StackedBarChartWidget::mousePressEvent(QMouseEvent* event)
         m_highlightedBar = -1;
         m_highlightedSegment = -1;
         m_highlightedLegendSegment = -1;
-        emit barSegmentSelected(-1, -1);
         update();
     }
 }

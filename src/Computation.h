@@ -52,8 +52,8 @@ class Computation : public WidgetAction
 
 public:
     Computation(ATACControllerViewPlugin& ATACControllerViewPlugin, SettingsAction& SettingsAction);
-    void highlightTriggered();
-    void clickTriggered();
+    void highlightTriggered(QString barName);
+    void clickTriggered(QString barName);
 private:
     std::tuple<QStringList, QVector<QVector<float>>, QVector<QColor>> computeMetadataCounts(const QVector<Cluster>& metadata, const std::vector<int>& topPoints); // TODO: to remove
 

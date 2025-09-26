@@ -42,18 +42,10 @@ void ATACControllerViewPlugin::init()
 
     // Connect to bar segment click
     connect(_stackedBarChartWidget, &StackedBarChartWidget::barSegmentClicked,
-        this, [this](int barIndex, int segmentIndex) {
+        this, [this](int barIndex, int segmentIndex, QString barName, QString segmentName) {
             // Handle click event
-            this->_computation.clickTriggered();
+            this->_computation.clickTriggered(segmentName);
         });
-
-    // Connect to bar segment selection (highlight)
-    connect(_stackedBarChartWidget, &StackedBarChartWidget::barSegmentSelected,
-        this, [this](int barIndex, int segmentIndex) {
-            // Handle selection event
-            this->_computation.highlightTriggered();
-        });
-
 
     //_stackedBarChartWidget->setShowLegend(true);
     //_stackedBarChartWidget->setLegendPosition(StackedBarChartWidget::LegendRight); // or LegendLeft, LegendTop, LegendBottom
