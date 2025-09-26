@@ -8,6 +8,28 @@
 #include <algorithm>
 #include <numeric>
 
+// --- Helper functions (file-scope) ---
+static bool isLightColor(const QColor& c)
+{
+    // Use relative luminance (sRGB) approximation.
+    // Convert to linear-ish luminance using NTSC weights.
+    double r = c.redF();
+    double g = c.greenF();
+    double b = c.blueF();
+    // Perceived luminance
+    double lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    // threshold chosen so medium colors are considered dark -> use white text
+    return lum > 0.6;
+}
+
+static QColor contrastColor(const QColor& underlying)
+{
+    // Return black for light underlying colors, white for dark ones.
+    return isLightColor(underlying) ? Qt::black : Qt::white;
+}
+
+// ------------------------------------------------
+
 StackedBarChartWidget::StackedBarChartWidget(QWidget* parent)
     : QWidget(parent)
 {
@@ -254,15 +276,23 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
     // Find max total value for scaling
     float maxTotal = 0.0;
     for (const auto& bar : m_data) {
-        float total = std::accumulate(bar.begin(), bar.end(), 0.0);
+        float total = std::accumulate(bar.begin(), bar.end(), 0.0f);
         maxTotal = std::max(maxTotal, total);
     }
     if (maxTotal == 0.0) maxTotal = 1.0;
 
+    // Determine widget background color (used for grid/axes/legend text contrast)
+    QColor widgetBg = palette().color(backgroundRole());
+    QColor gridContrast = contrastColor(widgetBg);
+
     // Draw grid and axes
     if (m_showGrid || m_showAxes) {
         painter.save();
-        painter.setPen(m_gridColor);
+        // Use grid color if explicit, but ensure it is black/white contrast for legibility.
+        QColor gridPenColor = m_gridColor.isValid() ? m_gridColor : gridContrast;
+        // If m_gridColor is set to something non-monochrome, convert it to black/white contrast to satisfy requirement:
+        gridPenColor = contrastColor(widgetBg); // ensure black/white only
+        painter.setPen(gridPenColor);
         if (m_stackingDirection == Vertical) {
             int steps = 5;
             for (int i = 0; i <= steps; ++i) {
@@ -271,16 +301,15 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
                     painter.drawLine(chartRect.left(), y, chartRect.right(), y);
                 if (m_showAxes) {
                     painter.setFont(m_axisFont);
-                    painter.setPen(Qt::black);
+                    painter.setPen(contrastColor(widgetBg));
                     painter.drawText(chartRect.left() - 40, y - 8, 35, 16, Qt::AlignRight | Qt::AlignVCenter,
-                        //QString::number(maxTotal * i / steps, 'g', 3)); // would cause 55800 round to 8e+4
                         QString::number(maxTotal * i / steps, 'f', 0)); // used for cell count
-
                 }
             }
             // Draw X axis ticks/labels for each bar
             if (m_showAxes) {
                 painter.setFont(m_axisFont);
+                painter.setPen(contrastColor(widgetBg));
                 for (int i = 0; i < barCount; ++i) {
                     int x = chartRect.left() + leftOffset + i * (barWidth + m_barSpacing);
                     painter.drawLine(x + barWidth / 2, chartRect.bottom(), x + barWidth / 2, chartRect.bottom() + 8);
@@ -291,6 +320,7 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
                 painter.save();
                 painter.translate(chartRect.left() - 60, chartRect.top());
                 painter.rotate(-90);
+                painter.setPen(contrastColor(widgetBg));
                 painter.drawText(0, 0, chartRect.height(), 20, Qt::AlignCenter, m_axisLabels.value(1));
                 painter.restore();
             }
@@ -303,7 +333,7 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
                     painter.drawLine(x, chartRect.top(), x, chartRect.bottom());
                 if (m_showAxes) {
                     painter.setFont(m_axisFont);
-                    painter.setPen(Qt::black);
+                    painter.setPen(contrastColor(widgetBg));
                     painter.drawText(x - 20, chartRect.bottom() + 5, 40, 16, Qt::AlignCenter,
                         QString::number(maxTotal * i / steps, 'g', 3));
                 }
@@ -311,6 +341,7 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
             // Draw Y axis ticks/labels for each bar
             if (m_showAxes) {
                 painter.setFont(m_axisFont);
+                painter.setPen(contrastColor(widgetBg));
                 for (int i = 0; i < barCount; ++i) {
                     int y = chartRect.top() + leftOffset + i * (barWidth + m_barSpacing);
                     painter.drawLine(chartRect.left() - 8, y + barWidth / 2, chartRect.left(), y + barWidth / 2);
@@ -321,6 +352,7 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
                 painter.save();
                 painter.translate(chartRect.left() - 60, chartRect.top());
                 painter.rotate(-90);
+                painter.setPen(contrastColor(widgetBg));
                 painter.drawText(0, 0, chartRect.height(), 20, Qt::AlignCenter, m_axisLabels.value(1));
                 painter.restore();
             }
@@ -337,8 +369,8 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
             chartRect.bottom() :
             chartRect.top() + leftOffset + i * (barWidth + m_barSpacing);
 
-        float yOffset = 0.0;
-        float xOffset = 0.0;
+        float yOffset = 0.0f;
+        float xOffset = 0.0f;
         for (int j = 0; j < m_data[i].size(); ++j) {
             float value = m_animationStep > 0 ? m_animatedData[i][j] : m_data[i][j];
             float height = m_stackingDirection == Vertical ?
@@ -354,6 +386,9 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
             QRectF barRect = m_stackingDirection == Vertical ?
                 QRectF(x, y - yOffset - height, barWidth, height) :
                 QRectF(x + xOffset, y, width, barWidth);
+
+            // Pick pen color for borders/text inside bar based on the bar's color:
+            QColor insideContrast = contrastColor(color);
 
             // Highlight on legend hover/selection
             if (j == m_hoveredLegendSegment) {
@@ -382,15 +417,19 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
                 QBrush brush(color, m_legendStyle);
                 painter.setBrush(brush);
             }
-            painter.setPen(QPen(m_barBorderColor, m_barBorderThickness));
+
+            // Pen for bar border: use contrast color relative to bar color (black/white)
+            QPen borderPen(contrastColor(color), m_barBorderThickness);
+            painter.setPen(borderPen);
+
             if (m_useRoundedBars && m_barCornerRadius > 0)
                 painter.drawRoundedRect(barRect, m_barCornerRadius, m_barCornerRadius);
             else
                 painter.drawRect(barRect);
 
-            // Show value on segment
+            // Show value on segment (centered in the segment) - choose color that contrasts against the bar
             if (m_showValuesOnSegments) {
-                painter.setPen(Qt::black);
+                painter.setPen(insideContrast);
                 painter.setFont(QFont());
                 QString valueStr = QString::number(value, 'g', 3);
                 painter.drawText(barRect, Qt::AlignCenter, valueStr);
@@ -428,7 +467,11 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
 {
     painter.save();
     painter.setFont(m_legendFont);
-    painter.setPen(Qt::black);
+
+    QColor widgetBg = palette().color(backgroundRole());
+    QColor legendTextColor = contrastColor(widgetBg);
+
+    painter.setPen(legendTextColor);
 
     m_legendItemRects.clear();
     m_legendItemRects.resize(m_segmentLabels.size()); // Pre-allocate to correct size
@@ -448,7 +491,11 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
         QColor color = (segmentIndex < m_colors.size()) ? m_colors[segmentIndex] : Qt::gray;
         QBrush brush(color, m_legendStyle);
 
-        // Highlight on selection
+        // Pen for legend box border should contrast with the legend color
+        QPen boxPen(contrastColor(color));
+        painter.setPen(boxPen);
+
+        // Fill / highlight handling
         if (segmentIndex == m_highlightedLegendSegment) {
             QColor highlight = m_highlightColors.isEmpty() ? m_highlightColor
                 : (segmentIndex < m_highlightColors.size() ? m_highlightColors[segmentIndex] : m_highlightColor);
@@ -466,7 +513,9 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
 
         painter.drawRect(itemRect);
 
+        // Draw label next to box using text color that contrasts with widget background
         QString label = m_segmentLabels.isEmpty() ? QString("Segment %1").arg(segmentIndex + 1) : m_segmentLabels[segmentIndex];
+        painter.setPen(legendTextColor);
         painter.drawText(x + 25, y + 13, label);
 
         y += itemHeight;
