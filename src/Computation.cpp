@@ -360,7 +360,7 @@ void Computation::prepareChartData()
     QVector<QColor> barColors;
 
     std::tie(segmentLabels, barData, barColors) = computeMetadataCounts(metadata, indices, numPoints);
-    qDebug() << "proportion computed for " << _points->getGuiName() << _clusters->getGuiName();
+    //qDebug() << "proportion computed for " << _points->getGuiName() << _clusters->getGuiName();
 
     auto* chartWidget = _viewerPlugin.getStackedBarChartWidget();
     if (!chartWidget)
