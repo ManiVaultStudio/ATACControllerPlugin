@@ -431,7 +431,8 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
             if (m_showValuesOnSegments) {
                 painter.setPen(insideContrast);
                 painter.setFont(QFont());
-                QString valueStr = QString::number(value, 'g', 3);
+                //QString valueStr = QString::number(value, 'g', 3);
+                QString valueStr = QString::number(value, 'f', 0); // integer format for cell counts
                 painter.drawText(barRect, Qt::AlignCenter, valueStr);
             }
 
