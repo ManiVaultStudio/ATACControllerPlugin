@@ -54,13 +54,13 @@ protected:
     void resizeEvent(QResizeEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
-
+    void wheelEvent(QWheelEvent* event) override;
 private:
-    void drawLegend(QPainter& painter, const QRect& rect);
+    void drawLegend(QPainter& painter, const QRect& rect, int scrollOffset, int visibleHeight, int totalHeight);
     QRect legendRect(const QRect& rect, int legendWidth, int legendHeight) const;
     void startAnimation();
     void animateStep();
-
+    
     // Data
     QVector<QVector<float>> m_data;
     QVector<QVector<float>> m_animatedData;
@@ -77,7 +77,7 @@ private:
     bool m_useRoundedBars = true;
     StackingDirection m_stackingDirection = Vertical;
     int m_barSpacing = 10;
-    int m_barWidth = -1;
+    int m_barWidth = 40;
     QColor m_barBorderColor = Qt::black;
     int m_barBorderThickness = 1;
     int m_barCornerRadius = 5;
@@ -98,6 +98,7 @@ private:
     int m_hoveredBar = -1;
     int m_hoveredSegment = -1;
     int m_hoveredLegendSegment = -1;
+    int m_legendScrollOffset = 0;
 
     // Animation
     int m_animationDuration = 400;

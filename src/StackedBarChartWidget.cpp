@@ -257,7 +257,7 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
     // Add space for color box and padding
     int legendBoxAndPad = 25 + 10;
     if (m_legendPosition == LegendRight || m_legendPosition == LegendLeft)
-        legendWidth = maxLabelWidth + legendBoxAndPad + 20; // 20 for extra margin
+        legendWidth = maxLabelWidth + legendBoxAndPad + 15; //extra margin
     if (m_legendPosition == LegendTop || m_legendPosition == LegendBottom)
         legendHeight = std::max(60, (int)m_segmentLabels.size() * 22);
 
@@ -456,8 +456,22 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
         }
     }
 
+    int visibleLegendHeight = rect.height() - 20;
+    int totalLegendHeight = m_segmentLabels.size() * 20; // itemHeight = 20
+    if ((m_legendPosition == LegendLeft || m_legendPosition == LegendRight) && totalLegendHeight > visibleLegendHeight) {
+        // Clamp scroll offset
+        int maxScroll = totalLegendHeight - visibleLegendHeight;
+        if (m_legendScrollOffset > maxScroll) m_legendScrollOffset = maxScroll;
+        if (m_legendScrollOffset < 0) m_legendScrollOffset = 0;
+    }
+    else {
+        m_legendScrollOffset = 0;
+    }
+
+
     // Draw legend
-    drawLegend(painter, legendRect(rect, legendWidth, legendHeight));
+    drawLegend(painter, legendRect(rect, legendWidth, legendHeight), m_legendScrollOffset, visibleLegendHeight, totalLegendHeight);
+
 }
 
 QRect StackedBarChartWidget::legendRect(const QRect& rect, int legendWidth, int legendHeight) const
@@ -475,7 +489,7 @@ QRect StackedBarChartWidget::legendRect(const QRect& rect, int legendWidth, int 
     return QRect();
 }
 
-void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
+void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect, int scrollOffset, int visibleHeight, int totalHeight)
 {
     painter.save();
     painter.setFont(m_legendFont);
@@ -486,34 +500,34 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
     painter.setPen(legendTextColor);
 
     m_legendItemRects.clear();
-    m_legendItemRects.resize(m_segmentLabels.size()); // Pre-allocate to correct size
+    m_legendItemRects.resize(m_segmentLabels.size());
 
     int itemHeight = 20;
-    int y = rect.top();
+    int y = rect.top() - scrollOffset;
     int x = rect.left();
     int count = m_segmentLabels.size();
 
-    // Draw legend items in reverse order to match bar stacking
+    // Only draw items that are visible in the scroll area
     for (int visualIndex = 0; visualIndex < count; ++visualIndex) {
-        int segmentIndex = count - 1 - visualIndex; // Reverse mapping
-
+        int segmentIndex = count - 1 - visualIndex;
         QRect itemRect(x, y, 20, 15);
-        m_legendItemRects[segmentIndex] = itemRect; // Store at correct index
+        m_legendItemRects[segmentIndex] = itemRect;
+
+        if (itemRect.bottom() < rect.top() || itemRect.top() > rect.bottom()) {
+            y += itemHeight;
+            continue; // skip items outside visible area
+        }
 
         QColor color = (segmentIndex < m_colors.size()) ? m_colors[segmentIndex] : Qt::gray;
         QBrush brush(color, m_legendStyle);
-
-        // Pen for legend box border should contrast with the legend color
         QPen boxPen(contrastColor(color));
         painter.setPen(boxPen);
 
-        // Fill / highlight handling
         if (segmentIndex == m_highlightedLegendSegment) {
             QColor highlight = m_highlightColors.isEmpty() ? m_highlightColor
                 : (segmentIndex < m_highlightColors.size() ? m_highlightColors[segmentIndex] : m_highlightColor);
             painter.setBrush(highlight);
         }
-        // Highlight on hover
         else if (segmentIndex == m_hoveredLegendSegment) {
             QColor highlight = m_highlightColors.isEmpty() ? m_highlightColor
                 : (segmentIndex < m_highlightColors.size() ? m_highlightColors[segmentIndex] : m_highlightColor);
@@ -525,14 +539,49 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
 
         painter.drawRect(itemRect);
 
-        // Draw label next to box using text color that contrasts with widget background
         QString label = m_segmentLabels.isEmpty() ? QString("Segment %1").arg(segmentIndex + 1) : m_segmentLabels[segmentIndex];
         painter.setPen(legendTextColor);
         painter.drawText(x + 25, y + 13, label);
 
         y += itemHeight;
     }
+
+    // Draw a simple scrollbar if needed
+    if (totalHeight > visibleHeight) {
+        int barHeight = std::max(20, visibleHeight * visibleHeight / totalHeight);
+        int barY = rect.top() + (visibleHeight - barHeight) * m_legendScrollOffset / (totalHeight - visibleHeight);
+        QRect scrollbar(rect.right() - 8, rect.top(), 8, visibleHeight);
+        QRect thumb(rect.right() - 8, barY, 8, barHeight);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QColor(200, 200, 200, 120));
+        painter.drawRect(scrollbar);
+        painter.setBrush(QColor(120, 120, 120, 180));
+        painter.drawRect(thumb);
+    }
+
     painter.restore();
+}
+
+void StackedBarChartWidget::wheelEvent(QWheelEvent* event)
+{
+    if (m_legendPosition == LegendLeft || m_legendPosition == LegendRight) {
+        QRect legend = legendRect(rect(), width(), height());
+        if (legend.contains(event->position().toPoint())) {
+            int totalLegendHeight = m_segmentLabels.size() * 20;
+            int visibleLegendHeight = legend.height();
+            if (totalLegendHeight > visibleLegendHeight) {
+                int numSteps = event->angleDelta().y() / 120;
+                m_legendScrollOffset -= numSteps * 20; // scroll by one item per step
+                int maxScroll = totalLegendHeight - visibleLegendHeight;
+                if (m_legendScrollOffset < 0) m_legendScrollOffset = 0;
+                if (m_legendScrollOffset > maxScroll) m_legendScrollOffset = maxScroll;
+                update();
+                event->accept();
+                return;
+            }
+        }
+    }
+    QWidget::wheelEvent(event);
 }
 
 void StackedBarChartWidget::resizeEvent(QResizeEvent* event)
