@@ -247,8 +247,19 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     QRect rect = this->rect();
-    int legendWidth = (m_legendPosition == LegendRight || m_legendPosition == LegendLeft) ? 120 : 0;
-    int legendHeight = (m_legendPosition == LegendTop || m_legendPosition == LegendBottom) ? 60 : 0;
+
+    // --- Dynamically compute legend size based on label length ---
+    int legendWidth = 0, legendHeight = 0;
+    QFontMetrics legendFm(m_legendFont);
+    int maxLabelWidth = 0;
+    for (const QString& label : m_segmentLabels)
+        maxLabelWidth = std::max(maxLabelWidth, legendFm.horizontalAdvance(label));
+    // Add space for color box and padding
+    int legendBoxAndPad = 25 + 10;
+    if (m_legendPosition == LegendRight || m_legendPosition == LegendLeft)
+        legendWidth = maxLabelWidth + legendBoxAndPad + 20; // 20 for extra margin
+    if (m_legendPosition == LegendTop || m_legendPosition == LegendBottom)
+        legendHeight = std::max(60, (int)m_segmentLabels.size() * 22);
 
     // Always show legend
     m_showLegend = true;
