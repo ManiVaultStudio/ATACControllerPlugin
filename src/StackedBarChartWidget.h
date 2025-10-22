@@ -54,13 +54,15 @@ protected:
     void resizeEvent(QResizeEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
+
 private:
-    void drawLegend(QPainter& painter, const QRect& rect, int scrollOffset, int visibleHeight, int totalHeight);
+    void drawLegend(QPainter& painter, const QRect& rect);
     QRect legendRect(const QRect& rect, int legendWidth, int legendHeight) const;
     void startAnimation();
     void animateStep();
-    
+
     // Data
     QVector<QVector<float>> m_data;
     QVector<QVector<float>> m_animatedData;
@@ -98,7 +100,6 @@ private:
     int m_hoveredBar = -1;
     int m_hoveredSegment = -1;
     int m_hoveredLegendSegment = -1;
-    int m_legendScrollOffset = 0;
 
     // Animation
     int m_animationDuration = 400;
@@ -107,4 +108,18 @@ private:
 
     // Interaction
     QVector<QVector<QRectF>> m_barRects;
+
+    //scroll
+    int m_legendScrollOffsetY = 0;
+    int m_legendScrollOffsetX = 0;
+    bool m_legendVerticalScrollbarVisible = false;
+    bool m_legendHorizontalScrollbarVisible = false;
+    QRect m_legendVerticalScrollbarRect;
+    QRect m_legendHorizontalScrollbarRect;
+    bool m_draggingLegendVScroll = false;
+    bool m_draggingLegendHScroll = false;
+    int m_dragStartPosY = 0;
+    int m_dragStartPosX = 0;
+    int m_scrollStartOffsetY = 0;
+    int m_scrollStartOffsetX = 0;
 };

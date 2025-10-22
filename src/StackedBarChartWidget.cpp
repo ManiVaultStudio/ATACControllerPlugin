@@ -247,19 +247,8 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     QRect rect = this->rect();
-
-    // --- Dynamically compute legend size based on label length ---
-    int legendWidth = 0, legendHeight = 0;
-    QFontMetrics legendFm(m_legendFont);
-    int maxLabelWidth = 0;
-    for (const QString& label : m_segmentLabels)
-        maxLabelWidth = std::max(maxLabelWidth, legendFm.horizontalAdvance(label));
-    // Add space for color box and padding
-    int legendBoxAndPad = 25 + 10;
-    if (m_legendPosition == LegendRight || m_legendPosition == LegendLeft)
-        legendWidth = maxLabelWidth + legendBoxAndPad + 15; //extra margin
-    if (m_legendPosition == LegendTop || m_legendPosition == LegendBottom)
-        legendHeight = std::max(60, (int)m_segmentLabels.size() * 22);
+    int legendWidth = (m_legendPosition == LegendRight || m_legendPosition == LegendLeft) ? 120 : 0;
+    int legendHeight = (m_legendPosition == LegendTop || m_legendPosition == LegendBottom) ? 60 : 0;
 
     // Always show legend
     m_showLegend = true;
@@ -456,22 +445,8 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
         }
     }
 
-    int visibleLegendHeight = rect.height() - 20;
-    int totalLegendHeight = m_segmentLabels.size() * 20; // itemHeight = 20
-    if ((m_legendPosition == LegendLeft || m_legendPosition == LegendRight) && totalLegendHeight > visibleLegendHeight) {
-        // Clamp scroll offset
-        int maxScroll = totalLegendHeight - visibleLegendHeight;
-        if (m_legendScrollOffset > maxScroll) m_legendScrollOffset = maxScroll;
-        if (m_legendScrollOffset < 0) m_legendScrollOffset = 0;
-    }
-    else {
-        m_legendScrollOffset = 0;
-    }
-
-
     // Draw legend
-    drawLegend(painter, legendRect(rect, legendWidth, legendHeight), m_legendScrollOffset, visibleLegendHeight, totalLegendHeight);
-
+    drawLegend(painter, legendRect(rect, legendWidth, legendHeight));
 }
 
 QRect StackedBarChartWidget::legendRect(const QRect& rect, int legendWidth, int legendHeight) const
@@ -489,7 +464,7 @@ QRect StackedBarChartWidget::legendRect(const QRect& rect, int legendWidth, int 
     return QRect();
 }
 
-void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect, int scrollOffset, int visibleHeight, int totalHeight)
+void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
 {
     painter.save();
     painter.setFont(m_legendFont);
@@ -503,23 +478,45 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect, int
     m_legendItemRects.resize(m_segmentLabels.size());
 
     int itemHeight = 20;
-    int y = rect.top() - scrollOffset;
-    int x = rect.left();
+    int itemWidth = 0;
+    QFontMetrics fm(m_legendFont);
+
+    // Calculate max label width
+    for (const auto& label : m_segmentLabels)
+        itemWidth = std::max(itemWidth, fm.horizontalAdvance(label));
+
+    int legendContentHeight = m_segmentLabels.size() * itemHeight;
+    int legendContentWidth = 25 + itemWidth + 10;
+
+    // Determine if scrollbars are needed
+    m_legendVerticalScrollbarVisible = legendContentHeight > rect.height();
+    m_legendHorizontalScrollbarVisible = legendContentWidth > rect.width();
+
+    // Adjust drawing area for scrollbars
+    int scrollbarThickness = 12;
+    QRect legendArea = rect;
+    if (m_legendVerticalScrollbarVisible)
+        legendArea.setWidth(legendArea.width() - scrollbarThickness);
+    if (m_legendHorizontalScrollbarVisible)
+        legendArea.setHeight(legendArea.height() - scrollbarThickness);
+
+    // Clamp scroll offsets
+    m_legendScrollOffsetY = std::clamp(m_legendScrollOffsetY, 0, std::max(0, legendContentHeight - legendArea.height()));
+    m_legendScrollOffsetX = std::clamp(m_legendScrollOffsetX, 0, std::max(0, legendContentWidth - legendArea.width()));
+
+    // Draw legend items (with scroll offset)
+    int y = legendArea.top() - m_legendScrollOffsetY;
+    int x = legendArea.left() - m_legendScrollOffsetX;
     int count = m_segmentLabels.size();
 
-    // Only draw items that are visible in the scroll area
     for (int visualIndex = 0; visualIndex < count; ++visualIndex) {
         int segmentIndex = count - 1 - visualIndex;
         QRect itemRect(x, y, 20, 15);
-        m_legendItemRects[segmentIndex] = itemRect;
-
-        if (itemRect.bottom() < rect.top() || itemRect.top() > rect.bottom()) {
-            y += itemHeight;
-            continue; // skip items outside visible area
-        }
+        m_legendItemRects[segmentIndex] = itemRect.translated(m_legendScrollOffsetX, m_legendScrollOffsetY);
 
         QColor color = (segmentIndex < m_colors.size()) ? m_colors[segmentIndex] : Qt::gray;
         QBrush brush(color, m_legendStyle);
+
         QPen boxPen(contrastColor(color));
         painter.setPen(boxPen);
 
@@ -537,56 +534,82 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect, int
             painter.setBrush(brush);
         }
 
-        painter.drawRect(itemRect);
-
-        QString label = m_segmentLabels.isEmpty() ? QString("Segment %1").arg(segmentIndex + 1) : m_segmentLabels[segmentIndex];
-        painter.setPen(legendTextColor);
-        painter.drawText(x + 25, y + 13, label);
-
+        // Only draw if visible
+        if (y + itemHeight > legendArea.top() && y < legendArea.bottom()) {
+            painter.drawRect(itemRect);
+            painter.setPen(legendTextColor);
+            painter.drawText(x + 25, y + 13, m_segmentLabels.isEmpty() ? QString("Segment %1").arg(segmentIndex + 1) : m_segmentLabels[segmentIndex]);
+        }
         y += itemHeight;
     }
 
-    // Draw a simple scrollbar if needed
-    if (totalHeight > visibleHeight) {
-        int barHeight = std::max(20, visibleHeight * visibleHeight / totalHeight);
-        int barY = rect.top() + (visibleHeight - barHeight) * m_legendScrollOffset / (totalHeight - visibleHeight);
-        QRect scrollbar(rect.right() - 8, rect.top(), 8, visibleHeight);
-        QRect thumb(rect.right() - 8, barY, 8, barHeight);
+    // Draw vertical scrollbar if needed
+    if (m_legendVerticalScrollbarVisible) {
+        int barHeight = std::max(20, legendArea.height() * legendArea.height() / legendContentHeight);
+        int barY = legendArea.top() + (legendArea.height() - barHeight) * m_legendScrollOffsetY / std::max(1, legendContentHeight - legendArea.height());
+        m_legendVerticalScrollbarRect = QRect(legendArea.right(), barY, scrollbarThickness, barHeight);
+        painter.setBrush(Qt::gray);
         painter.setPen(Qt::NoPen);
-        painter.setBrush(QColor(200, 200, 200, 120));
-        painter.drawRect(scrollbar);
-        painter.setBrush(QColor(120, 120, 120, 180));
-        painter.drawRect(thumb);
+        painter.drawRect(legendArea.right(), legendArea.top(), scrollbarThickness, legendArea.height());
+        painter.setBrush(Qt::darkGray);
+        painter.drawRect(m_legendVerticalScrollbarRect);
+    }
+
+    // Draw horizontal scrollbar if needed
+    if (m_legendHorizontalScrollbarVisible) {
+        int barWidth = std::max(20, legendArea.width() * legendArea.width() / legendContentWidth);
+        int barX = legendArea.left() + (legendArea.width() - barWidth) * m_legendScrollOffsetX / std::max(1, legendContentWidth - legendArea.width());
+        m_legendHorizontalScrollbarRect = QRect(barX, legendArea.bottom(), barWidth, scrollbarThickness);
+        painter.setBrush(Qt::gray);
+        painter.setPen(Qt::NoPen);
+        painter.drawRect(legendArea.left(), legendArea.bottom(), legendArea.width(), scrollbarThickness);
+        painter.setBrush(Qt::darkGray);
+        painter.drawRect(m_legendHorizontalScrollbarRect);
     }
 
     painter.restore();
 }
 
-void StackedBarChartWidget::wheelEvent(QWheelEvent* event)
-{
-    if (m_legendPosition == LegendLeft || m_legendPosition == LegendRight) {
-        QRect legend = legendRect(rect(), width(), height());
-        if (legend.contains(event->position().toPoint())) {
-            int totalLegendHeight = m_segmentLabels.size() * 20;
-            int visibleLegendHeight = legend.height();
-            if (totalLegendHeight > visibleLegendHeight) {
-                int numSteps = event->angleDelta().y() / 120;
-                m_legendScrollOffset -= numSteps * 20; // scroll by one item per step
-                int maxScroll = totalLegendHeight - visibleLegendHeight;
-                if (m_legendScrollOffset < 0) m_legendScrollOffset = 0;
-                if (m_legendScrollOffset > maxScroll) m_legendScrollOffset = maxScroll;
-                update();
-                event->accept();
-                return;
-            }
-        }
-    }
-    QWidget::wheelEvent(event);
-}
-
 void StackedBarChartWidget::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
+
+    // Recalculate legend content and area
+    int legendWidth = (m_legendPosition == LegendRight || m_legendPosition == LegendLeft) ? 120 : 0;
+    int legendHeight = (m_legendPosition == LegendTop || m_legendPosition == LegendBottom) ? 60 : 0;
+    QRect legendRect = this->legendRect(this->rect(), legendWidth, legendHeight);
+
+    QFontMetrics fm(m_legendFont);
+    int itemWidth = 0;
+    for (const auto& label : m_segmentLabels)
+        itemWidth = std::max(itemWidth, fm.horizontalAdvance(label));
+    int legendContentWidth = 25 + itemWidth + 10;
+    int legendContentHeight = m_segmentLabels.size() * 20;
+
+    int scrollbarThickness = 12;
+    QRect legendArea = legendRect;
+    bool vScroll = legendContentHeight > legendRect.height();
+    bool hScroll = legendContentWidth > legendRect.width();
+    if (vScroll)
+        legendArea.setWidth(legendArea.width() - scrollbarThickness);
+    if (hScroll)
+        legendArea.setHeight(legendArea.height() - scrollbarThickness);
+
+    // Update scrollbars visibility
+    m_legendVerticalScrollbarVisible = legendContentHeight > legendArea.height();
+    m_legendHorizontalScrollbarVisible = legendContentWidth > legendArea.width();
+
+    // Clamp or reset scroll offsets if not needed
+    if (!m_legendHorizontalScrollbarVisible)
+        m_legendScrollOffsetX = 0;
+    else
+        m_legendScrollOffsetX = std::clamp(m_legendScrollOffsetX, 0, std::max(0, legendContentWidth - legendArea.width()));
+
+    if (!m_legendVerticalScrollbarVisible)
+        m_legendScrollOffsetY = 0;
+    else
+        m_legendScrollOffsetY = std::clamp(m_legendScrollOffsetY, 0, std::max(0, legendContentHeight - legendArea.height()));
+
     update();
 }
 
@@ -594,6 +617,35 @@ void StackedBarChartWidget::mouseMoveEvent(QMouseEvent* event)
 {
     if (m_data.isEmpty() || m_barRects.isEmpty())
         return;
+
+    if (m_draggingLegendVScroll) {
+        int legendContentHeight = m_segmentLabels.size() * 20;
+        int legendAreaHeight = m_legendVerticalScrollbarRect.height() + m_legendVerticalScrollbarRect.top() - m_legendVerticalScrollbarRect.y();
+        int deltaY = event->pos().y() - m_dragStartPosY;
+        int maxOffset = std::max(0, legendContentHeight - legendAreaHeight);
+        int scrollArea = height() - m_legendVerticalScrollbarRect.height();
+        if (scrollArea > 0) {
+            m_legendScrollOffsetY = std::clamp(m_scrollStartOffsetY + deltaY * maxOffset / scrollArea, 0, maxOffset);
+            update();
+        }
+        return;
+    }
+    if (m_draggingLegendHScroll) {
+        QFontMetrics fm(m_legendFont);
+        int itemWidth = 0;
+        for (const auto& label : m_segmentLabels)
+            itemWidth = std::max(itemWidth, fm.horizontalAdvance(label));
+        int legendContentWidth = 25 + itemWidth + 10;
+        int legendAreaWidth = m_legendHorizontalScrollbarRect.width() + m_legendHorizontalScrollbarRect.left() - m_legendHorizontalScrollbarRect.x();
+        int deltaX = event->pos().x() - m_dragStartPosX;
+        int maxOffset = std::max(0, legendContentWidth - legendAreaWidth);
+        int scrollArea = width() - m_legendHorizontalScrollbarRect.width();
+        if (scrollArea > 0) {
+            m_legendScrollOffsetX = std::clamp(m_scrollStartOffsetX + deltaX * maxOffset / scrollArea, 0, maxOffset);
+            update();
+        }
+        return;
+    }
 
     int oldBar = m_hoveredBar, oldSeg = m_hoveredSegment, oldLegend = m_hoveredLegendSegment;
     m_hoveredBar = m_hoveredSegment = m_hoveredLegendSegment = -1;
@@ -630,8 +682,54 @@ void StackedBarChartWidget::mouseMoveEvent(QMouseEvent* event)
         update();
 }
 
+void StackedBarChartWidget::wheelEvent(QWheelEvent* event)
+{
+    if (m_legendVerticalScrollbarVisible) {
+        int maxOffset = std::max(0, static_cast<int>(m_segmentLabels.size()) * 20 - (height() - (m_legendHorizontalScrollbarVisible ? 12 : 0)));
+        m_legendScrollOffsetY = std::clamp(m_legendScrollOffsetY - event->angleDelta().y() / 2, 0, maxOffset);
+        update();
+        event->accept();
+        return;
+    }
+    if (m_legendHorizontalScrollbarVisible) {
+        // Calculate legendContentWidth as in drawLegend for accuracy
+        QFontMetrics fm(m_legendFont);
+        int itemWidth = 0;
+        for (const auto& label : m_segmentLabels)
+            itemWidth = std::max(itemWidth, fm.horizontalAdvance(label));
+        int legendContentWidth = 25 + itemWidth + 10;
+        int maxOffset = std::max(0, legendContentWidth - (width() - (m_legendVerticalScrollbarVisible ? 12 : 0)));
+        m_legendScrollOffsetX = std::clamp(m_legendScrollOffsetX - event->angleDelta().x() / 2, 0, maxOffset);
+        update();
+        event->accept();
+        return;
+    }
+    QWidget::wheelEvent(event);
+}
+
+void StackedBarChartWidget::mouseReleaseEvent(QMouseEvent* event)
+{
+    m_draggingLegendVScroll = false;
+    m_draggingLegendHScroll = false;
+    QWidget::mouseReleaseEvent(event);
+}
+
 void StackedBarChartWidget::mousePressEvent(QMouseEvent* event)
 {
+    // Scrollbar drag start
+    if (m_legendVerticalScrollbarVisible && m_legendVerticalScrollbarRect.contains(event->pos())) {
+        m_draggingLegendVScroll = true;
+        m_dragStartPosY = event->pos().y();
+        m_scrollStartOffsetY = m_legendScrollOffsetY;
+        return;
+    }
+    if (m_legendHorizontalScrollbarVisible && m_legendHorizontalScrollbarRect.contains(event->pos())) {
+        m_draggingLegendHScroll = true;
+        m_dragStartPosX = event->pos().x();
+        m_scrollStartOffsetX = m_legendScrollOffsetX;
+        return;
+    }
+    
     // Check legend items first
     for (int seg = 0; seg < m_legendItemRects.size(); ++seg) {
         if (m_legendItemRects[seg].contains(event->pos())) {
