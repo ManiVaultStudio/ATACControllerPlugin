@@ -54,6 +54,8 @@ protected:
     void resizeEvent(QResizeEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
 
 private:
     void drawLegend(QPainter& painter, const QRect& rect);
@@ -77,7 +79,7 @@ private:
     bool m_useRoundedBars = true;
     StackingDirection m_stackingDirection = Vertical;
     int m_barSpacing = 10;
-    int m_barWidth = -1;
+    int m_barWidth = 40;
     QColor m_barBorderColor = Qt::black;
     int m_barBorderThickness = 1;
     int m_barCornerRadius = 5;
@@ -106,4 +108,18 @@ private:
 
     // Interaction
     QVector<QVector<QRectF>> m_barRects;
+
+    //scroll
+    int m_legendScrollOffsetY = 0;
+    int m_legendScrollOffsetX = 0;
+    bool m_legendVerticalScrollbarVisible = false;
+    bool m_legendHorizontalScrollbarVisible = false;
+    QRect m_legendVerticalScrollbarRect;
+    QRect m_legendHorizontalScrollbarRect;
+    bool m_draggingLegendVScroll = false;
+    bool m_draggingLegendHScroll = false;
+    int m_dragStartPosY = 0;
+    int m_dragStartPosX = 0;
+    int m_scrollStartOffsetY = 0;
+    int m_scrollStartOffsetX = 0;
 };
