@@ -660,9 +660,14 @@ void StackedBarChartWidget::mouseMoveEvent(QMouseEvent* event)
     int oldBar = m_hoveredBar, oldSeg = m_hoveredSegment, oldLegend = m_hoveredLegendSegment;
     m_hoveredBar = m_hoveredSegment = m_hoveredLegendSegment = -1;
 
+    // Adjust mouse position for legend scroll offsets
+    QPoint legendTestPos = event->pos();
+    legendTestPos.setX(legendTestPos.x() + m_legendScrollOffsetX);
+    legendTestPos.setY(legendTestPos.y() + m_legendScrollOffsetY);
+
     // Check legend hover first
     for (int seg = 0; seg < m_legendItemRects.size(); ++seg) {
-        if (m_legendItemRects[seg].contains(event->pos())) {
+        if (m_legendItemRects[seg].contains(legendTestPos)) {
             m_hoveredLegendSegment = seg;
             update();
             return;
