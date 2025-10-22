@@ -254,7 +254,7 @@ void StackedBarChartWidget::paintEvent(QPaintEvent* event)
     m_showLegend = true;
 
     QRect chartRect = rect.adjusted(
-        m_legendPosition == LegendLeft ? legendWidth + 40 : 40,
+        m_legendPosition == LegendLeft ? legendWidth + 25 : 25,
         m_legendPosition == LegendTop ? legendHeight + 10 : 10,
         m_legendPosition == LegendRight ? -legendWidth - 10 : -10,
         m_legendPosition == LegendBottom ? -legendHeight - 10 : -10
@@ -492,13 +492,20 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
     m_legendVerticalScrollbarVisible = legendContentHeight > rect.height();
     m_legendHorizontalScrollbarVisible = legendContentWidth > rect.width();
 
-    // Adjust drawing area for scrollbars
-    int scrollbarThickness = 12;
+    // Adjust drawing area for scrollbars and add padding for horizontal scrollbar
+    int scrollbarThickness = 10;
+    const int legendRightPadding = 2;
+    const int legendBottomPadding = 10;
     QRect legendArea = rect;
     if (m_legendVerticalScrollbarVisible)
-        legendArea.setWidth(legendArea.width() - scrollbarThickness);
+        legendArea.setWidth(legendArea.width() - scrollbarThickness - legendRightPadding);
+    else
+        legendArea.setWidth(legendArea.width() - legendRightPadding);
+
     if (m_legendHorizontalScrollbarVisible)
-        legendArea.setHeight(legendArea.height() - scrollbarThickness);
+        legendArea.setHeight(legendArea.height() - scrollbarThickness - legendBottomPadding);
+    else
+        legendArea.setHeight(legendArea.height() - legendBottomPadding);
 
     // Clamp scroll offsets
     m_legendScrollOffsetY = std::clamp(m_legendScrollOffsetY, 0, std::max(0, legendContentHeight - legendArea.height()));
@@ -538,7 +545,10 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
         if (y + itemHeight > legendArea.top() && y < legendArea.bottom()) {
             painter.drawRect(itemRect);
             painter.setPen(legendTextColor);
-            painter.drawText(x + 25, y + 13, m_segmentLabels.isEmpty() ? QString("Segment %1").arg(segmentIndex + 1) : m_segmentLabels[segmentIndex]);
+            // Move text up by 1 pixel for better vertical alignment
+            QRect textRect(x + 25, y - 1, legendArea.right() - (x + 25), 15);
+            painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter,
+                m_segmentLabels.isEmpty() ? QString("Segment %1").arg(segmentIndex + 1) : m_segmentLabels[segmentIndex]);
         }
         y += itemHeight;
     }
@@ -547,10 +557,10 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
     if (m_legendVerticalScrollbarVisible) {
         int barHeight = std::max(20, legendArea.height() * legendArea.height() / legendContentHeight);
         int barY = legendArea.top() + (legendArea.height() - barHeight) * m_legendScrollOffsetY / std::max(1, legendContentHeight - legendArea.height());
-        m_legendVerticalScrollbarRect = QRect(legendArea.right(), barY, scrollbarThickness, barHeight);
+        m_legendVerticalScrollbarRect = QRect(legendArea.right() + legendRightPadding, barY, scrollbarThickness, barHeight);
         painter.setBrush(Qt::gray);
         painter.setPen(Qt::NoPen);
-        painter.drawRect(legendArea.right(), legendArea.top(), scrollbarThickness, legendArea.height());
+        painter.drawRect(legendArea.right() + legendRightPadding, legendArea.top(), scrollbarThickness, legendArea.height());
         painter.setBrush(Qt::darkGray);
         painter.drawRect(m_legendVerticalScrollbarRect);
     }
@@ -559,10 +569,10 @@ void StackedBarChartWidget::drawLegend(QPainter& painter, const QRect& rect)
     if (m_legendHorizontalScrollbarVisible) {
         int barWidth = std::max(20, legendArea.width() * legendArea.width() / legendContentWidth);
         int barX = legendArea.left() + (legendArea.width() - barWidth) * m_legendScrollOffsetX / std::max(1, legendContentWidth - legendArea.width());
-        m_legendHorizontalScrollbarRect = QRect(barX, legendArea.bottom(), barWidth, scrollbarThickness);
+        m_legendHorizontalScrollbarRect = QRect(barX, legendArea.bottom() + legendBottomPadding, barWidth, scrollbarThickness);
         painter.setBrush(Qt::gray);
         painter.setPen(Qt::NoPen);
-        painter.drawRect(legendArea.left(), legendArea.bottom(), legendArea.width(), scrollbarThickness);
+        painter.drawRect(legendArea.left(), legendArea.bottom() + legendBottomPadding, legendArea.width(), scrollbarThickness);
         painter.setBrush(Qt::darkGray);
         painter.drawRect(m_legendHorizontalScrollbarRect);
     }
