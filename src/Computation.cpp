@@ -462,6 +462,6 @@ std::tuple<QStringList, QVector<QVector<float>>, QVector<QColor>> Computation::c
 
 void Computation::clickTriggered(QString segmentName)
 {
-    //_clusters->setSelectionNames({ segmentName });
+    _clusters->setSelectionNames({ segmentName });
 }
 

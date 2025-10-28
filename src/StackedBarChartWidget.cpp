@@ -722,6 +722,11 @@ void StackedBarChartWidget::wheelEvent(QWheelEvent* event)
     QWidget::wheelEvent(event);
 }
 
+void StackedBarChartWidget::setEnableClickSelect(bool enable)
+{
+    m_enableClickSelect = enable;
+}
+
 void StackedBarChartWidget::mouseReleaseEvent(QMouseEvent* event)
 {
     m_draggingLegendVScroll = false;
@@ -744,7 +749,11 @@ void StackedBarChartWidget::mousePressEvent(QMouseEvent* event)
         m_scrollStartOffsetX = m_legendScrollOffsetX;
         return;
     }
-    
+
+    // Only allow selection if enabled
+    if (!m_enableClickSelect)
+        return;
+
     // Check legend items first
     for (int seg = 0; seg < m_legendItemRects.size(); ++seg) {
         if (m_legendItemRects[seg].contains(event->pos())) {
