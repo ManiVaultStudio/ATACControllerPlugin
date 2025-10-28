@@ -44,6 +44,7 @@ public:
     void setHighlightColor(const QColor& color);
     void setHighlightColors(const QVector<QColor>& colors);
     void setAnimationDuration(int duration);
+    void setEnableClickSelect(bool enable);
     void clearData();
 
 signals:
@@ -122,4 +123,5 @@ private:
     int m_dragStartPosX = 0;
     int m_scrollStartOffsetY = 0;
     int m_scrollStartOffsetX = 0;
+    bool m_enableClickSelect = false;
 };
