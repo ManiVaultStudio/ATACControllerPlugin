@@ -2,6 +2,8 @@
 
 #include <event/Event.h>
 
+#include <util/Serialization.h>
+
 #include <DatasetsMimeData.h>
 
 #include <QDebug>
